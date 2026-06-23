@@ -1,0 +1,55 @@
+# DEV SEED universe (spec §4 approximation). Replace/extend with real point-in-time
+# Russell 1000 membership when available; until then this + delisted.csv is the universe,
+# and the backtest prints the survivorship caveat banner (spec §6, §7).
+# Diverse liquid large/mid caps incl. the spec's exemplars (NVDA/PLTR/VST/SNDK/OKLO/MU).
+ticker,sector,industry
+NVDA,Technology,Semiconductors
+AMD,Technology,Semiconductors
+AVGO,Technology,Semiconductors
+MU,Technology,Semiconductors
+TSM,Technology,Semiconductors
+ASML,Technology,Semiconductors
+SNDK,Technology,Storage
+WDC,Technology,Storage
+STX,Technology,Storage
+ANET,Technology,Networking
+CIEN,Technology,Networking
+COHR,Technology,Networking
+VRT,Industrials,Electrical Equipment
+SMCI,Technology,Hardware
+PLTR,Technology,Software
+MSFT,Technology,Software
+NOW,Technology,Software
+CRM,Technology,Software
+ORCL,Technology,Software
+ADBE,Technology,Software
+AAPL,Technology,Hardware
+GOOGL,Communication Services,Internet
+META,Communication Services,Internet
+AMZN,Consumer Discretionary,Internet Retail
+NFLX,Communication Services,Streaming
+VST,Utilities,Independent Power
+CEG,Utilities,Independent Power
+NRG,Utilities,Independent Power
+GEV,Industrials,Electrical Equipment
+OKLO,Utilities,Nuclear
+NEE,Utilities,Electric
+ETN,Industrials,Electrical Equipment
+PWR,Industrials,Construction
+ROK,Industrials,Automation
+EMR,Industrials,Automation
+FSLR,Technology,Solar
+ENPH,Technology,Solar
+TSLA,Consumer Discretionary,Autos
+NUE,Materials,Steel
+FCX,Materials,Copper
+LLY,Health Care,Pharma
+UNH,Health Care,Managed Care
+JPM,Financials,Banks
+GS,Financials,Banks
+V,Financials,Payments
+MA,Financials,Payments
+COST,Consumer Staples,Retail
+WMT,Consumer Staples,Retail
+XOM,Energy,Integrated Oil
+CVX,Energy,Integrated Oil

@@ -1,0 +1,9 @@
+# M1 delisted overlay (spec §3) — keeps dead tickers in the historical universe so the
+# backtest isn't survivorship-poisoned. Add busted SPACs, blowups, acquisitions, bankruptcies.
+# last_date = last date the name should appear in universe[t]. reason for audit trail.
+ticker,name,sector,industry,delist_date,reason
+SIVB,SVB Financial,Financials,Banks,2023-03-10,bank failure
+FRC,First Republic Bank,Financials,Banks,2023-05-01,bank failure / JPM acquisition
+ATVI,Activision Blizzard,Communication Services,Gaming,2023-10-13,acquired by Microsoft
+SGEN,Seagen,Health Care,Biotech,2023-12-14,acquired by Pfizer
+SPLK,Splunk,Technology,Software,2024-03-18,acquired by Cisco

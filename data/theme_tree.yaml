@@ -1,0 +1,25 @@
+# M3 Theme & bottleneck mapper — the ONE human-curated input (spec §3).
+# Each theme lists its value-chain sub-layers, ordered roughly upstream -> downstream.
+# Everything else (which theme leads, which sub-layer is under-extended) is COMPUTED.
+# Add themes/sub-layers as the capital cycle shifts; keep tickers minimal — membership
+# is resolved by sector/industry + keyword, not hard-coded conviction.
+
+AI:
+  sublayers:
+    chips:      { keywords: [semiconductor, gpu, accelerator], example_tickers: [NVDA, AMD, AVGO, TSM] }
+    power:      { keywords: [utility, power, nuclear, grid],    example_tickers: [VST, CEG, GEV, OKLO, NRG] }
+    memory:     { keywords: [memory, dram, nand, storage],      example_tickers: [MU, SNDK, WDC, STX] }
+    networking: { keywords: [networking, optical, switch],      example_tickers: [ANET, CIEN, COHR] }
+    cooling:    { keywords: [thermal, cooling, liquid],         example_tickers: [VRT, SMCI] }
+    software:   { keywords: [software, model, inference],       example_tickers: [PLTR, MSFT, NOW] }
+
+Electrification:
+  sublayers:
+    generation: { keywords: [solar, wind, renewable],          example_tickers: [FSLR, NEE, ENPH] }
+    storage:    { keywords: [battery, energy storage],          example_tickers: [TSLA, STEM] }
+    grid:       { keywords: [transmission, grid, transformer],  example_tickers: [GEV, ETN, PWR] }
+
+Reshoring:
+  sublayers:
+    equipment:  { keywords: [industrial, automation, robotics], example_tickers: [ROK, EMR, ETN] }
+    materials:  { keywords: [steel, copper, materials],         example_tickers: [NUE, FCX] }

@@ -1,0 +1,84 @@
+# Asymmetric Allocator — config (spec §9). All thresholds tunable & auditable.
+# The backtester (M8) can sweep any of these.
+
+book_size_gbp: 10000
+rebalance: monthly            # monthly rebalance, weekly signal refresh
+base_currency: GBP
+fx_gbp_usd: 1.27             # GBP->USD for share-count math on US-listed names (approx)
+
+universe:
+  source: sp500               # 'sp500' = mechanical S&P500 list (data/sp500_constituents.csv);
+                              # 'seed' = the 50-name dev list. sp500 kills my hand-pick bias.
+  min_mktcap_usd: 1.5e+9     # signed exponent: PyYAML parses 1.5e9 as a STRING otherwise
+  min_adv_usd: 10.0e+6
+  index: russell1000          # approximated via current membership + delisted overlay (see §4)
+
+# M4 base sub-score weights (regime-modulated at runtime)
+weights:
+  ERM: 0.30   # Estimate-Revision Momentum  (anchored — most robust signal)
+  RS:  0.25   # Price / Relative Strength   (point-in-time clean from prices)
+  FI:  0.15   # Fundamental Inflection
+  EXP: 0.15   # Expectations / Low-Bar (inverted valuation + short interest)
+  CAT: 0.10   # Catalyst
+  THM: 0.05   # Theme & layer
+
+# M4 regime modifiers: multiply sub-weight then renormalise to sum 1.
+# ERM stays anchored (1.0) in every regime by design.
+regime_modifiers:
+  RISK_ON:     { RS: 1.4, EXP: 0.7 }
+  MIXED:       { }
+  COMPRESSION: { RS: 0.6, EXP: 1.5 }
+
+# M2 regime budgets (anchor / satellite / cash)
+regime_budgets:
+  RISK_ON:     { anchor: 0.45, satellite: 0.40, cash: 0.15 }
+  MIXED:       { anchor: 0.55, satellite: 0.25, cash: 0.20 }
+  COMPRESSION: { anchor: 0.65, satellite: 0.10, cash: 0.25 }
+
+# M6 position caps
+caps:
+  anchor_max: 0.20
+  satellite_max: 0.05
+  satellite_total_max: 0.45
+
+# M5 bucket cutoffs (Winner Score 0-100, Extension 0-100)
+cuts:
+  A_cut: 80     # anchor min Winner Score
+  S_cut: 75     # satellite min Winner Score
+  E_hi:  65     # anchor min Extension (confirmed leader)
+  E_lo:  40     # satellite max Extension (early / under-extended)
+  max_anchors: 15      # concentration sweet spot from the out-of-sample sweep (n15 best full CAGR)
+  max_satellites: 6    # small, capped satellites; the fat-tail sleeve
+
+# Live-book behaviour
+live:
+  use_regime_gate: true   # true = keep the regime cash sleeve (spec §1.5 survival; -15.7% DD,
+                          # robust-pick winner). false = fully deploy = max raw return
+                          # (+41% vs +34% CAGR) but -20.7% DD. Your call; evidence in scripts/sweep.py.
+
+# M7 exit rules
+exits:
+  stop_atr: 2.5       # hard stop = entry - 2.5 * ATR
+  trim1_at: 0.50      # take 1/3 at +50%
+  trim2_at: 1.00      # take another 1/3 at +100%
+  trail_atr: 3.0      # once in profit, trail at 3 * ATR
+
+# M6 sizing overlay
+kelly_fraction: 0.25  # quarter-Kelly tilt, secondary to caps/budget
+
+# M8 backtest
+costs_bps: 8          # transaction cost + slippage per side
+
+backtest:
+  start: "2020-01-01"
+  end:   "2026-06-01"
+  rebalance: monthly
+  tune_window:     ["2020-01-01", "2023-12-31"]   # in-sample (threshold tuning)
+  validate_window: ["2024-01-01", "2026-06-01"]   # out-of-sample (untouched)
+
+# M2 regime gate thresholds (illustrative triggers, spec §2)
+regime:
+  breadth_riskon: 0.55          # % universe above own 200dma
+  vix_lookback_days: 252        # VIX vs 1-yr median
+  credit_spread_series: BAA10Y  # spec wanted ICE BofA HY (BAMLH0A0HYM2) but FRED truncates
+                                # it to ~3yr; BAA10Y is daily + full history (see fred.py)

@@ -1,0 +1,10 @@
+# M3/CAT manual catalyst overlay (spec §4, §7) — spin-offs, index inclusions, activist stakes,
+# dated product catalysts that the free APIs miss. Automate what we can; this fills the gap.
+# kind in: spinoff | index_inclusion | buyback | activist | product | other
+# event_date = when it happens/happened; recency decay applied in M4 CAT sub-score.
+ticker,kind,event_date,note
+SNDK,spinoff,2025-02-21,SanDisk spun out of Western Digital
+GEV,spinoff,2024-04-02,GE Vernova spun out of GE
+SOLV,spinoff,2024-04-01,Solventum spun out of 3M
+PLTR,index_inclusion,2024-09-23,added to S&P 500
+VST,index_inclusion,2024-05-08,added to S&P 500

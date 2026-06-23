@@ -1,0 +1,10 @@
+# Asymmetric Allocator — runtime deps
+pandas>=2.2
+numpy>=1.26
+requests>=2.31
+PyYAML>=6.0
+python-dotenv>=1.0
+yfinance>=0.2.50      # secondary price source (research only, per spec §4)
+jinja2>=3.1           # M9 HTML dashboard
+lxml>=5.0             # parse the S&P 500 constituent table (Wikipedia, no key)
+flask>=3.0            # local live-refreshable site (M9 web)
