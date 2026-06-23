@@ -208,7 +208,8 @@ def _actions_html(diff: dict | None, result: dict) -> str:
 
 
 def render_dashboard(result: dict, diff: dict | None = None, out_path: str | Path | None = None,
-                     backtest: dict | None = None, next_run: str | None = None) -> Path:
+                     backtest: dict | None = None, next_run: str | None = None,
+                     gpt_comparison: list | None = None) -> Path:
     reg = result["regime"]
     alloc = result["allocation"]
     as_of = result["as_of"]
@@ -276,6 +277,10 @@ def render_dashboard(result: dict, diff: dict | None = None, out_path: str | Pat
                      'out-of-sample validated): <span class="green">+34% CAGR</span> vs S&amp;P +14.5%, '
                      'max drawdown <span class="green">&minus;16%</span> vs &minus;25%. '
                      'Re-run with <span class="muted">research</span> for the curve.</div>')
+
+    if gpt_comparison:
+        from . import gpt_benchmark
+        parts.append(gpt_benchmark.render_comparison_html(gpt_comparison))
 
     parts.append(
         '<div class="banner">&#9873; Decision-support, not advice &mdash; it proposes, you place manually. '
