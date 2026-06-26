@@ -1,0 +1,133 @@
+# ES/NQ Futures Trading Bot — configuration per acceptance criteria §2-§6.
+
+instruments:
+  ES:
+    name: "E-mini S&P 500"
+    tick_size: 0.25
+    tick_value: 12.50        # USD per tick
+    margin: 15000            # approximate initial margin per contract
+    commission: 4.50         # round-trip per contract (broker dependent)
+  NQ:
+    name: "E-mini Nasdaq-100"
+    tick_size: 0.25
+    tick_value: 5.00         # USD per tick
+    margin: 20000
+    commission: 4.50
+
+account:
+  size: 100000               # starting account size USD
+  currency: USD
+
+# --- Signal: Scalper v2.0 rule-set (placeholder — wire the real Pine Script logic) ---
+signal:
+  name: "Scalper v2.0"
+  # EMA crossover as the primary trend filter
+  ema_fast: 9
+  ema_slow: 21
+  ema_trend: 50              # trend filter — only trade in direction of 50 EMA
+  # RSI confirmation
+  rsi_period: 14
+  rsi_overbought: 70
+  rsi_oversold: 30
+  # VWAP
+  use_vwap: true             # long above VWAP, short below VWAP
+  # Momentum confirmation
+  momentum_period: 10
+  # De-duplication: no repeat signal within X bars of an open position
+  dedup_bars: 5
+
+# --- Exits (§3) ---
+exits:
+  # Stop-loss: ATR-based bracket order (broker-side)
+  stop_mode: "atr"           # "atr" or "fixed_ticks"
+  stop_atr_mult: 2.0         # stop = entry ± (2.0 * ATR)
+  stop_fixed_ticks: 20       # used if stop_mode = fixed_ticks
+  atr_period: 14
+  # Profit target
+  target_mode: "atr"         # "atr" or "fixed_ticks" or "rr_ratio"
+  target_atr_mult: 3.0       # target = entry ± (3.0 * ATR) — 1.5:1 R:R at minimum
+  target_fixed_ticks: 40
+  target_rr_ratio: 1.5       # if mode=rr_ratio, target = stop_distance * ratio
+  # Trailing stop
+  use_trailing: true
+  trail_atr_mult: 1.5        # trail at 1.5 * ATR once in profit
+  trail_activation_atr: 1.0  # activate trail after price moves 1.0 * ATR in favour
+  # Time-stop: force-close if no exit hit
+  time_stop_bars: 30         # force-close after 30 bars
+  time_stop_minutes: 60      # or 60 minutes, whichever comes first
+
+# --- Risk controls (§3) ---
+risk:
+  max_risk_per_trade_pct: 1.0      # max 1% of account risked per trade
+  max_risk_per_trade_usd: 1000     # hard dollar cap per trade
+  daily_loss_limit_pct: 3.0        # halt after 3% account drawdown in a session
+  daily_loss_limit_usd: 3000       # or $3000 whichever hit first
+  max_consecutive_losses: 5        # pause for manual review after 5 consecutive losers
+  max_open_positions_per_instrument: 1  # no scaling unless explicitly defined
+  max_total_positions: 2           # one ES + one NQ max
+
+# --- Session management (§3) ---
+session:
+  # Trading window
+  mode: "full"               # "full" (23hr) or "restricted" (RTH + London/NY overlap)
+  rth_start: "09:30"         # ET
+  rth_end: "16:00"           # ET
+  extended_start: "18:00"    # Sunday ET
+  extended_end: "17:00"      # Friday ET
+  # Daily maintenance break — no new orders
+  maintenance_start: "17:00" # ET
+  maintenance_end: "18:00"   # ET
+  # Contract roll
+  roll_blackout_days: 3      # no new entries within 3 days of roll
+  auto_roll: true            # auto-roll open positions to front month
+  # High-impact news handling
+  news_action: "pause"       # "pause", "widen_stops", or "continue"
+  news_stop_multiplier: 1.5  # if widen_stops, multiply stop distance by this
+  # Reconnection
+  reconnect_max_retries: 10
+  reconnect_backoff_seconds: 5
+
+# --- Execution (§2) ---
+execution:
+  platform: "ninjatrader"    # execution target
+  mode: "webhook"            # "webhook" (TradingView -> NinjaTrader) or "ninjascript"
+  webhook_url: ""            # set in .env: NINJATRADER_WEBHOOK_URL
+  webhook_secret: ""         # set in .env: NINJATRADER_WEBHOOK_SECRET
+  order_type: "bracket"      # always bracket orders for broker-side stop/target
+
+# --- Alerts (§6) ---
+alerts:
+  telegram:
+    enabled: false
+    bot_token: ""            # set in .env: TELEGRAM_BOT_TOKEN
+    chat_id: ""              # set in .env: TELEGRAM_CHAT_ID
+  email:
+    enabled: false
+    smtp_host: ""
+    smtp_port: 587
+    sender: ""
+    recipient: ""
+  on_fill: true
+  on_error: true
+  daily_summary: true
+  daily_summary_time: "17:30"  # ET, after maintenance start
+
+# --- Performance gates (§4) — promotion to live ---
+performance_gates:
+  min_trades: 100
+  min_profit_factor: 1.5
+  max_drawdown_pct: 10.0
+  live_vs_backtest_tolerance_pct: 15   # win rate and R:R within 15% of backtest
+
+# --- Backtest (§5) ---
+backtest:
+  data_source: "csv"         # "csv" or "api"
+  data_dir: "data/futures"
+  start: "2022-01-01"
+  end: "2025-12-31"
+  commission_per_contract: 4.50
+  slippage_ticks: 1          # realistic slippage per side
+  walk_forward:
+    in_sample_months: 12
+    out_of_sample_months: 3
+  paper_trading_weeks: 4     # minimum forward paper trading before live
