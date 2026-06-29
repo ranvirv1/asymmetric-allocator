@@ -1,0 +1,30 @@
+# Render.com blueprint — the easy path to an always-on, phone-reachable dashboard.
+# In Render: New +  ->  Blueprint  ->  pick this repo. It reads this file, then
+# prompts you for the secret values below (they are never stored in git).
+# Docs / full walkthrough: see DEPLOY.md.
+services:
+  - type: web
+    name: asymmetric-allocator
+    runtime: python
+    plan: free                 # free instance sleeps after ~15 min idle (cold start ~1 min)
+    buildCommand: pip install -r requirements.txt && pip install -e .
+    startCommand: gunicorn webapp:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: PYTHONPATH
+        value: src
+      - key: PYTHONUTF8
+        value: "1"
+      # Secrets — Render prompts for these on deploy (sync:false = not committed).
+      - key: FRED_API_KEY
+        sync: false
+      - key: FMP_API_KEY
+        sync: false
+      - key: FINNHUB_API_KEY    # optional
+        sync: false
+      # Password-gate the public URL (Basic Auth). Set BOTH or the site is open.
+      - key: APP_USER
+        sync: false
+      - key: APP_PASSWORD
+        sync: false

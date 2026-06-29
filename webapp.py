@@ -1,27 +1,67 @@
-"""Local live site for the Asymmetric Allocator (M9 web).
+"""Live site for the Asymmetric Allocator (M9 web).
 
-Run:  $env:PYTHONUTF8=1 ; .venv\\Scripts\\python.exe webapp.py
-Then open http://127.0.0.1:8765 in any browser. The control bar lets you flip the Safe/Returns
-dial and refresh; the report rebuilds in the background and reloads when done. Fully outside
-Claude — data + keys stay on your machine.
+Local:  $env:PYTHONUTF8=1 ; .venv\\Scripts\\python.exe webapp.py
+        then open http://127.0.0.1:8765
+
+Cloud:  gunicorn webapp:app   (binds the platform's $PORT)
+        Deploy anywhere always-on so you can view + refresh from your phone with
+        the laptop off — see DEPLOY.md. Set APP_USER/APP_PASSWORD to password-gate
+        the public URL.
+
+The control bar flips the Safe/Returns dial and refreshes; the report rebuilds in
+the background and reloads when done.
 """
 from __future__ import annotations
 
+import base64
+import hmac
 import os
 import subprocess
+import sys
 import threading
 import time
 from pathlib import Path
 
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, Response, jsonify, request, send_file
 
 ROOT = Path(__file__).resolve().parent
-PY = ROOT / ".venv" / "Scripts" / "python.exe"
+# Use the interpreter actually running this process (the venv locally, the system
+# Python in a container) — never a hardcoded path, which broke on non-Windows hosts.
+PY = sys.executable
 RUNNER = ROOT / "scripts" / "weekly_run.py"
-LATEST = ROOT / "reports" / "latest.html"
+# Honour the same DATA_DIR/REPORTS_DIR overrides the engine uses (persistent disk).
+LATEST = Path(os.getenv("REPORTS_DIR") or ROOT / "reports") / "latest.html"
 
 app = Flask(__name__)
 JOB = {"running": False, "mode": "safe", "phase": "", "last": None, "log": ""}
+
+# Optional HTTP Basic Auth. When APP_USER + APP_PASSWORD are set (always set them
+# for a public deploy), every route requires them. Unset locally = open, as before.
+_AUTH_USER = os.getenv("APP_USER")
+_AUTH_PASS = os.getenv("APP_PASSWORD")
+
+
+def _authorized() -> bool:
+    if not (_AUTH_USER and _AUTH_PASS):
+        return True  # auth disabled (local dev)
+    hdr = request.headers.get("Authorization", "")
+    if not hdr.startswith("Basic "):
+        return False
+    try:
+        user, _, pw = base64.b64decode(hdr[6:]).decode("utf-8").partition(":")
+    except Exception:  # noqa: BLE001
+        return False
+    # constant-time compare to avoid leaking length/contents via timing
+    return hmac.compare_digest(user, _AUTH_USER) and hmac.compare_digest(pw, _AUTH_PASS)
+
+
+@app.before_request
+def _gate():
+    if not _authorized():
+        return Response(
+            "Authentication required.", 401,
+            {"WWW-Authenticate": 'Basic realm="Asymmetric Allocator"'},
+        )
 
 
 def _run(mode: str, full: bool) -> None:
@@ -30,6 +70,8 @@ def _run(mode: str, full: bool) -> None:
     if not full:
         flags.append("norefresh")
     env = {**os.environ, "PYTHONUTF8": "1"}
+    # Make `import allocator` resolve even if the package wasn't pip-installed.
+    env["PYTHONPATH"] = os.pathsep.join(filter(None, [str(ROOT / "src"), env.get("PYTHONPATH", "")]))
     try:
         r = subprocess.run([str(PY), str(RUNNER), *flags], cwd=str(ROOT), env=env,
                            capture_output=True, text=True, timeout=1500)
@@ -43,8 +85,9 @@ def _run(mode: str, full: bool) -> None:
 def report():
     if LATEST.exists():
         return send_file(LATEST)
-    return ("<body style='background:#0a0b0d;color:#8b8f98;font-family:monospace;padding:40px'>"
-            "No report yet &mdash; click <b>Refresh data</b> above.</body>")
+    return ("<!doctype html><meta name='viewport' content='width=device-width, initial-scale=1'>"
+            "<body style='background:#0a0b0d;color:#8b8f98;font-family:monospace;padding:40px'>"
+            "No report yet &mdash; tap <b>Refresh data</b> above.</body>")
 
 
 @app.route("/api/rebuild", methods=["POST"])
@@ -63,10 +106,42 @@ def status():
                    log=JOB["log"][-600:])
 
 
-_INDEX = """<!doctype html><html><head><meta charset="utf-8"><title>Asymmetric Allocator</title>
+# --- PWA: lets you "Add to Home Screen" for a one-tap, full-screen app icon ----
+_ICON = ("<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'>"
+         "<rect width='512' height='512' rx='96' fill='#0a0b0d'/>"
+         "<text x='50%' y='54%' font-family='Georgia,serif' font-style='italic' "
+         "font-size='300' fill='#d29922' text-anchor='middle' dominant-baseline='middle'>A</text>"
+         "</svg>")
+
+
+@app.route("/icon.svg")
+def icon():
+    return Response(_ICON, mimetype="image/svg+xml")
+
+
+@app.route("/manifest.webmanifest")
+def manifest():
+    return jsonify({
+        "name": "Asymmetric Allocator",
+        "short_name": "Allocator",
+        "display": "standalone",
+        "background_color": "#0a0b0d",
+        "theme_color": "#111317",
+        "start_url": "/",
+        "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml"}],
+    })
+
+
+_INDEX = """<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Asymmetric Allocator</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#111317">
 <style>
 html,body{margin:0;height:100%;background:#0a0b0d;font-family:'DM Mono',ui-monospace,monospace}
-#bar{display:flex;align-items:center;gap:14px;height:54px;padding:0 18px;background:#111317;border-bottom:1px solid #1e2128;color:#e8e6e1;font-size:13px}
+#bar{display:flex;align-items:center;gap:12px;min-height:54px;padding:8px 14px;background:#111317;border-bottom:1px solid #1e2128;color:#e8e6e1;font-size:13px;flex-wrap:wrap}
 .title{font-style:italic;font-family:Georgia,serif;font-size:18px;color:#e8e6e1}
 .seg{display:flex;border:1px solid #1e2128;border-radius:7px;overflow:hidden}
 .seg button{background:#0a0b0d;color:#8b8f98;border:0;padding:7px 14px;cursor:pointer;font-family:inherit;font-size:12.5px}
@@ -77,6 +152,7 @@ html,body{margin:0;height:100%;background:#0a0b0d;font-family:'DM Mono',ui-monos
 #status{color:#8b8f98;font-size:12px;margin-left:auto}
 .spin{color:#d29922}
 iframe{border:0;width:100%;height:calc(100% - 54px);background:#0a0b0d}
+@media (max-width:560px){#status{margin-left:0;width:100%;order:9}iframe{height:calc(100% - 96px)}}
 </style></head><body>
 <div id="bar">
   <span class="title">Asymmetric Allocator</span>
@@ -92,7 +168,6 @@ iframe{border:0;width:100%;height:calc(100% - 54px);background:#0a0b0d}
 <script>
 let MODE='safe', poll=null;
 function setMode(m){ if(m===MODE) return; MODE=m;
-  document.getElementById('safe').className = 'on safe'.replace('on ', m==='safe'?'on ':'');
   document.getElementById('safe').classList.toggle('on', m==='safe');
   document.getElementById('returns').classList.toggle('on', m==='returns');
   document.getElementById('returns').classList.toggle('returns', m==='returns');
@@ -127,9 +202,12 @@ def index():
 
 
 if __name__ == "__main__":
-    import threading
     import webbrowser
-    url = "http://127.0.0.1:8765"
+    port = int(os.getenv("PORT", "8765"))
+    # Localhost by default; set HOST=0.0.0.0 to reach it from other devices on your LAN.
+    host = os.getenv("HOST", "127.0.0.1")
+    url = f"http://{host}:{port}"
     print(f"Asymmetric Allocator site -> {url}  (Ctrl+C to stop)")
-    threading.Timer(1.3, lambda: webbrowser.open(url)).start()
-    app.run(host="127.0.0.1", port=8765, debug=False)
+    if host in ("127.0.0.1", "localhost"):
+        threading.Timer(1.3, lambda: webbrowser.open(url)).start()
+    app.run(host=host, port=port, debug=False)

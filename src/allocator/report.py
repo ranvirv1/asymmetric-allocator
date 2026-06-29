@@ -44,6 +44,13 @@ td.l{text-align:left}
 .muted{color:var(--muted)} .green{color:var(--green)} .red{color:var(--red)} .amber{color:var(--amber)} .blue{color:var(--blue)}
 .banner{margin-top:34px;border:1px dashed var(--amber);border-radius:8px;padding:12px 16px;color:var(--amber);font-size:11px;line-height:1.7}
 .edge{color:var(--muted);font-size:12px;margin-top:6px}
+@media (max-width:640px){
+  body{padding:18px 14px 60px;font-size:12.5px}
+  h1{font-size:30px} h2{font-size:19px}
+  .bigbar{width:100%} .deploy{gap:10px}
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  th,td{padding:7px 6px;white-space:nowrap}
+}
 """
 
 
@@ -286,6 +293,7 @@ def render_dashboard(result: dict, diff: dict | None = None, out_path: str | Pat
     out_path = Path(out_path) if out_path else REPORTS_DIR / f"dashboard_{as_of.date()}.html"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("<!doctype html><html><head><meta charset='utf-8'>"
+                        "<meta name='viewport' content='width=device-width, initial-scale=1'>"
                         "<title>Asymmetric Allocator</title></head><body>"
                         + "".join(parts) + "</body></html>", encoding="utf-8")
     return out_path
