@@ -37,6 +37,35 @@ def refresh_live_data(tickers: list[str]) -> dict:
     return stats
 
 
+def roll_claude_round(result: dict, as_of: pd.Timestamp, top_n: int = 6) -> dict:
+    """Weekly auto-log: close any LIVE Claude round and open a fresh one from the allocator's
+    current top-conviction anchors, so the Claude-vs-ChatGPT race tracks the live engine.
+    Idempotent for a given day — skips if a Claude round was already opened on `as_of`."""
+    from . import gpt_benchmark  # imported lazily (file is edited often)
+
+    today = str(pd.Timestamp(as_of).date())
+    picks = gpt_benchmark.load_picks("claude")
+    if not picks.empty:
+        # already rolled today? don't duplicate
+        if (picks["pub_date"].astype(str).str[:10] == today).any():
+            return {"rolled": False, "reason": "already rolled today"}
+        # close any live (blank end_date) Claude rounds
+        for rid, g in picks.groupby("round_id"):
+            end = g.iloc[0]["end_date"]
+            if str(end) in ("", "NaT", "nan") or end != end:
+                gpt_benchmark.close_round(int(rid), today)
+
+    anchors = result["buckets"].anchors
+    if anchors.empty:
+        return {"rolled": False, "reason": "no anchors"}
+    tickers = anchors.head(top_n).index.tolist()
+    res = gpt_benchmark.log_picks(
+        tickers=tickers, weights=None, model="claude",
+        name=f"Claude Allocator {pd.Timestamp(as_of).strftime('%b %Y')}", pub_date=today,
+    )
+    return {"rolled": True, "round_id": res.get("round_id"), "tickers": tickers}
+
+
 def take_snapshot(tickers: list[str], as_of: pd.Timestamp) -> dict:
     """Forward-snapshot job (spec §8.8): bank this week's analyst consensus + revision counts
     into data/snapshots/estimates_<date>.csv so a TRUE point-in-time ERM series accumulates

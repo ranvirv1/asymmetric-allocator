@@ -1,0 +1,517 @@
+ticker,sector,industry,index
+MMM,Industrials,Industrial Conglomerates,sp500
+AOS,Industrials,Building Products,sp500
+ABT,Health Care,Health Care Equipment,sp500
+ABBV,Health Care,Biotechnology,sp500
+ACN,Information Technology,IT Consulting & Other Services,sp500
+ADBE,Information Technology,Application Software,sp500
+AMD,Information Technology,Semiconductors,sp500
+AES,Utilities,Independent Power Producers & Energy Traders,sp500
+AFL,Financials,Life & Health Insurance,sp500
+A,Health Care,Life Sciences Tools & Services,sp500
+APD,Materials,Industrial Gases,sp500
+ABNB,Consumer Discretionary,"Hotels, Resorts & Cruise Lines",sp500
+AKAM,Information Technology,Internet Services & Infrastructure,sp500
+ALB,Materials,Specialty Chemicals,sp500
+ARE,Real Estate,Office REITs,sp500
+ALGN,Health Care,Health Care Supplies,sp500
+ALLE,Industrials,Building Products,sp500
+LNT,Utilities,Electric Utilities,sp500
+ALL,Financials,Property & Casualty Insurance,sp500
+GOOGL,Communication Services,Interactive Media & Services,sp500
+GOOG,Communication Services,Interactive Media & Services,sp500
+MO,Consumer Staples,Tobacco,sp500
+AMZN,Consumer Discretionary,Broadline Retail,sp500
+AMCR,Materials,Paper & Plastic Packaging Products & Materials,sp500
+AEE,Utilities,Multi-Utilities,sp500
+AEP,Utilities,Electric Utilities,sp500
+AXP,Financials,Consumer Finance,sp500
+AIG,Financials,Multi-line Insurance,sp500
+AMT,Real Estate,Telecom Tower REITs,sp500
+AWK,Utilities,Water Utilities,sp500
+AMP,Financials,Asset Management & Custody Banks,sp500
+AME,Industrials,Electrical Components & Equipment,sp500
+AMGN,Health Care,Biotechnology,sp500
+APH,Information Technology,Electronic Components,sp500
+ADI,Information Technology,Semiconductors,sp500
+AON,Financials,Insurance Brokers,sp500
+APA,Energy,Oil & Gas Exploration & Production,sp500
+APO,Financials,Asset Management & Custody Banks,sp500
+AAPL,Information Technology,"Technology Hardware, Storage & Peripherals",sp500
+AMAT,Information Technology,Semiconductor Materials & Equipment,sp500
+APP,Information Technology,Application Software,sp500
+APTV,Consumer Discretionary,Automotive Parts & Equipment,sp500
+ACGL,Financials,Property & Casualty Insurance,sp500
+ADM,Consumer Staples,Agricultural Products & Services,sp500
+ARES,Financials,Asset Management & Custody Banks,sp500
+ANET,Information Technology,Communications Equipment,sp500
+AJG,Financials,Insurance Brokers,sp500
+AIZ,Financials,Multi-line Insurance,sp500
+T,Communication Services,Integrated Telecommunication Services,sp500
+ATO,Utilities,Gas Utilities,sp500
+ADSK,Information Technology,Application Software,sp500
+ADP,Industrials,Human Resource & Employment Services,sp500
+AZO,Consumer Discretionary,Automotive Retail,sp500
+AVB,Real Estate,Multi-Family Residential REITs,sp500
+AVY,Materials,Paper & Plastic Packaging Products & Materials,sp500
+AXON,Industrials,Aerospace & Defense,sp500
+BKR,Energy,Oil & Gas Equipment & Services,sp500
+BALL,Materials,"Metal, Glass & Plastic Containers",sp500
+BAC,Financials,Diversified Banks,sp500
+BAX,Health Care,Health Care Equipment,sp500
+BDX,Health Care,Health Care Equipment,sp500
+BRK-B,Financials,Multi-Sector Holdings,sp500
+BBY,Consumer Discretionary,Computer & Electronics Retail,sp500
+TECH,Health Care,Life Sciences Tools & Services,sp500
+BIIB,Health Care,Biotechnology,sp500
+BLK,Financials,Asset Management & Custody Banks,sp500
+BX,Financials,Asset Management & Custody Banks,sp500
+XYZ,Financials,Transaction & Payment Processing Services,sp500
+BNY,Financials,Asset Management & Custody Banks,sp500
+BA,Industrials,Aerospace & Defense,sp500
+BKNG,Consumer Discretionary,"Hotels, Resorts & Cruise Lines",sp500
+BSX,Health Care,Health Care Equipment,sp500
+BMY,Health Care,Pharmaceuticals,sp500
+AVGO,Information Technology,Semiconductors,sp500
+BR,Industrials,Data Processing & Outsourced Services,sp500
+BRO,Financials,Insurance Brokers,sp500
+BF-B,Consumer Staples,Distillers & Vintners,sp500
+BLDR,Industrials,Building Products,sp500
+BG,Consumer Staples,Agricultural Products & Services,sp500
+BXP,Real Estate,Office REITs,sp500
+CHRW,Industrials,Air Freight & Logistics,sp500
+CDNS,Information Technology,Application Software,sp500
+CPT,Real Estate,Multi-Family Residential REITs,sp500
+COF,Financials,Consumer Finance,sp500
+CAH,Health Care,Health Care Distributors,sp500
+CCL,Consumer Discretionary,"Hotels, Resorts & Cruise Lines",sp500
+CARR,Industrials,Building Products,sp500
+CVNA,Consumer Discretionary,Automotive Retail,sp500
+CASY,Consumer Staples,Food Retail,sp500
+CAT,Industrials,Construction Machinery & Heavy Transportation Equipment,sp500
+CBOE,Financials,Financial Exchanges & Data,sp500
+CBRE,Real Estate,Real Estate Services,sp500
+CDW,Information Technology,Technology Distributors,sp500
+COR,Health Care,Health Care Distributors,sp500
+CNC,Health Care,Managed Health Care,sp500
+CNP,Utilities,Multi-Utilities,sp500
+CF,Materials,Fertilizers & Agricultural Chemicals,sp500
+CRL,Health Care,Life Sciences Tools & Services,sp500
+SCHW,Financials,Investment Banking & Brokerage,sp500
+CHTR,Communication Services,Cable & Satellite,sp500
+CVX,Energy,Integrated Oil & Gas,sp500
+CMG,Consumer Discretionary,Restaurants,sp500
+CB,Financials,Property & Casualty Insurance,sp500
+CHD,Consumer Staples,Household Products,sp500
+CIEN,Information Technology,Communications Equipment,sp500
+CI,Health Care,Health Care Services,sp500
+CINF,Financials,Property & Casualty Insurance,sp500
+CTAS,Industrials,Diversified Support Services,sp500
+CSCO,Information Technology,Communications Equipment,sp500
+C,Financials,Diversified Banks,sp500
+CFG,Financials,Regional Banks,sp500
+CLX,Consumer Staples,Household Products,sp500
+CME,Financials,Financial Exchanges & Data,sp500
+CMS,Utilities,Multi-Utilities,sp500
+KO,Consumer Staples,Soft Drinks & Non-alcoholic Beverages,sp500
+CTSH,Information Technology,IT Consulting & Other Services,sp500
+COHR,Information Technology,Electronic Components,sp500
+COIN,Financials,Financial Exchanges & Data,sp500
+CL,Consumer Staples,Household Products,sp500
+CMCSA,Communication Services,Cable & Satellite,sp500
+FIX,Industrials,Construction & Engineering,sp500
+CAG,Consumer Staples,Packaged Foods & Meats,sp500
+COP,Energy,Oil & Gas Exploration & Production,sp500
+ED,Utilities,Multi-Utilities,sp500
+STZ,Consumer Staples,Distillers & Vintners,sp500
+CEG,Utilities,Electric Utilities,sp500
+COO,Health Care,Health Care Supplies,sp500
+CPRT,Industrials,Diversified Support Services,sp500
+GLW,Information Technology,Electronic Components,sp500
+CPAY,Financials,Transaction & Payment Processing Services,sp500
+CTVA,Materials,Fertilizers & Agricultural Chemicals,sp500
+CSGP,Real Estate,Real Estate Services,sp500
+COST,Consumer Staples,Consumer Staples Merchandise Retail,sp500
+CRH,Materials,Construction Materials,sp500
+CRWD,Information Technology,Systems Software,sp500
+CCI,Real Estate,Telecom Tower REITs,sp500
+CSX,Industrials,Rail Transportation,sp500
+CMI,Industrials,Construction Machinery & Heavy Transportation Equipment,sp500
+CVS,Health Care,Health Care Services,sp500
+DHR,Health Care,Life Sciences Tools & Services,sp500
+DRI,Consumer Discretionary,Restaurants,sp500
+DDOG,Information Technology,Application Software,sp500
+DVA,Health Care,Health Care Services,sp500
+DECK,Consumer Discretionary,Footwear,sp500
+DE,Industrials,Agricultural & Farm Machinery,sp500
+DELL,Information Technology,"Technology Hardware, Storage & Peripherals",sp500
+DAL,Industrials,Passenger Airlines,sp500
+DVN,Energy,Oil & Gas Exploration & Production,sp500
+DXCM,Health Care,Health Care Equipment,sp500
+FANG,Energy,Oil & Gas Exploration & Production,sp500
+DLR,Real Estate,Data Center REITs,sp500
+DG,Consumer Staples,Consumer Staples Merchandise Retail,sp500
+DLTR,Consumer Staples,Consumer Staples Merchandise Retail,sp500
+D,Utilities,Multi-Utilities,sp500
+DPZ,Consumer Discretionary,Restaurants,sp500
+DASH,Consumer Discretionary,Specialized Consumer Services,sp500
+DOV,Industrials,Industrial Machinery & Supplies & Components,sp500
+DOW,Materials,Commodity Chemicals,sp500
+DHI,Consumer Discretionary,Homebuilding,sp500
+DTE,Utilities,Multi-Utilities,sp500
+DUK,Utilities,Electric Utilities,sp500
+DD,Materials,Specialty Chemicals,sp500
+ETN,Industrials,Electrical Components & Equipment,sp500
+EBAY,Consumer Discretionary,Broadline Retail,sp500
+ECHO,Communication Services,Wireless Telecommunication Services,sp500
+ECL,Materials,Specialty Chemicals,sp500
+EIX,Utilities,Electric Utilities,sp500
+EW,Health Care,Health Care Equipment,sp500
+EA,Communication Services,Interactive Home Entertainment,sp500
+ELV,Health Care,Managed Health Care,sp500
+EME,Industrials,Construction & Engineering,sp500
+EMR,Industrials,Electrical Components & Equipment,sp500
+ETR,Utilities,Electric Utilities,sp500
+EOG,Energy,Oil & Gas Exploration & Production,sp500
+EQT,Energy,Oil & Gas Exploration & Production,sp500
+EFX,Industrials,Research & Consulting Services,sp500
+EQIX,Real Estate,Data Center REITs,sp500
+EQR,Real Estate,Multi-Family Residential REITs,sp500
+ERIE,Financials,Insurance Brokers,sp500
+ESS,Real Estate,Multi-Family Residential REITs,sp500
+EL,Consumer Staples,Personal Care Products,sp500
+EG,Financials,Reinsurance,sp500
+EVRG,Utilities,Electric Utilities,sp500
+ES,Utilities,Electric Utilities,sp500
+EXC,Utilities,Electric Utilities,sp500
+EXE,Energy,Oil & Gas Exploration & Production,sp500
+EXPE,Consumer Discretionary,"Hotels, Resorts & Cruise Lines",sp500
+EXPD,Industrials,Air Freight & Logistics,sp500
+EXR,Real Estate,Self-Storage REITs,sp500
+XOM,Energy,Integrated Oil & Gas,sp500
+FFIV,Information Technology,Communications Equipment,sp500
+FDS,Financials,Financial Exchanges & Data,sp500
+FICO,Information Technology,Application Software,sp500
+FAST,Industrials,Trading Companies & Distributors,sp500
+FRT,Real Estate,Retail REITs,sp500
+FDX,Industrials,Air Freight & Logistics,sp500
+FDXF,Industrials,Cargo Ground Transportation,sp500
+FIS,Financials,Transaction & Payment Processing Services,sp500
+FITB,Financials,Regional Banks,sp500
+FSLR,Information Technology,Semiconductors,sp500
+FE,Utilities,Electric Utilities,sp500
+FISV,Financials,Transaction & Payment Processing Services,sp500
+FLEX,Information Technology,Electronic Manufacturing Services,sp500
+F,Consumer Discretionary,Automobile Manufacturers,sp500
+FTNT,Information Technology,Systems Software,sp500
+FTV,Industrials,Industrial Machinery & Supplies & Components,sp500
+FOXA,Communication Services,Broadcasting,sp500
+FOX,Communication Services,Broadcasting,sp500
+BEN,Financials,Asset Management & Custody Banks,sp500
+FCX,Materials,Copper,sp500
+GRMN,Consumer Discretionary,Consumer Electronics,sp500
+IT,Information Technology,IT Consulting & Other Services,sp500
+GE,Industrials,Aerospace & Defense,sp500
+GEHC,Health Care,Health Care Equipment,sp500
+GEV,Industrials,Heavy Electrical Equipment,sp500
+GEN,Information Technology,Systems Software,sp500
+GNRC,Industrials,Electrical Components & Equipment,sp500
+GD,Industrials,Aerospace & Defense,sp500
+GIS,Consumer Staples,Packaged Foods & Meats,sp500
+GM,Consumer Discretionary,Automobile Manufacturers,sp500
+GPC,Consumer Discretionary,Distributors,sp500
+GILD,Health Care,Biotechnology,sp500
+GPN,Financials,Transaction & Payment Processing Services,sp500
+GL,Financials,Life & Health Insurance,sp500
+GDDY,Information Technology,Internet Services & Infrastructure,sp500
+GS,Financials,Investment Banking & Brokerage,sp500
+HAL,Energy,Oil & Gas Equipment & Services,sp500
+HIG,Financials,Property & Casualty Insurance,sp500
+HAS,Consumer Discretionary,Leisure Products,sp500
+HCA,Health Care,Health Care Facilities,sp500
+DOC,Real Estate,Health Care REITs,sp500
+HSIC,Health Care,Health Care Distributors,sp500
+HSY,Consumer Staples,Packaged Foods & Meats,sp500
+HPE,Information Technology,"Technology Hardware, Storage & Peripherals",sp500
+HLT,Consumer Discretionary,"Hotels, Resorts & Cruise Lines",sp500
+HD,Consumer Discretionary,Home Improvement Retail,sp500
+HON,Industrials,Industrial Conglomerates,sp500
+HRL,Consumer Staples,Packaged Foods & Meats,sp500
+HST,Real Estate,Hotel & Resort REITs,sp500
+HWM,Industrials,Aerospace & Defense,sp500
+HPQ,Information Technology,"Technology Hardware, Storage & Peripherals",sp500
+HUBB,Industrials,Industrial Machinery & Supplies & Components,sp500
+HUM,Health Care,Managed Health Care,sp500
+HBAN,Financials,Regional Banks,sp500
+HII,Industrials,Aerospace & Defense,sp500
+IBM,Information Technology,IT Consulting & Other Services,sp500
+IEX,Industrials,Industrial Machinery & Supplies & Components,sp500
+IDXX,Health Care,Health Care Equipment,sp500
+ITW,Industrials,Industrial Machinery & Supplies & Components,sp500
+INCY,Health Care,Biotechnology,sp500
+IR,Industrials,Industrial Machinery & Supplies & Components,sp500
+PODD,Health Care,Health Care Equipment,sp500
+INTC,Information Technology,Semiconductors,sp500
+IBKR,Financials,Investment Banking & Brokerage,sp500
+ICE,Financials,Financial Exchanges & Data,sp500
+IFF,Materials,Specialty Chemicals,sp500
+IP,Materials,Paper & Plastic Packaging Products & Materials,sp500
+INTU,Information Technology,Application Software,sp500
+ISRG,Health Care,Health Care Equipment,sp500
+IVZ,Financials,Asset Management & Custody Banks,sp500
+INVH,Real Estate,Single-Family Residential REITs,sp500
+IQV,Health Care,Life Sciences Tools & Services,sp500
+IRM,Real Estate,Other Specialized REITs,sp500
+JBHT,Industrials,Cargo Ground Transportation,sp500
+JBL,Information Technology,Electronic Manufacturing Services,sp500
+JKHY,Financials,Transaction & Payment Processing Services,sp500
+J,Industrials,Construction & Engineering,sp500
+JNJ,Health Care,Pharmaceuticals,sp500
+JCI,Industrials,Building Products,sp500
+JPM,Financials,Diversified Banks,sp500
+KVUE,Consumer Staples,Personal Care Products,sp500
+KDP,Consumer Staples,Soft Drinks & Non-alcoholic Beverages,sp500
+KEY,Financials,Regional Banks,sp500
+KEYS,Information Technology,Electronic Equipment & Instruments,sp500
+KMB,Consumer Staples,Household Products,sp500
+KIM,Real Estate,Retail REITs,sp500
+KMI,Energy,Oil & Gas Storage & Transportation,sp500
+KKR,Financials,Asset Management & Custody Banks,sp500
+KLAC,Information Technology,Semiconductor Materials & Equipment,sp500
+KHC,Consumer Staples,Packaged Foods & Meats,sp500
+KR,Consumer Staples,Food Retail,sp500
+LHX,Industrials,Aerospace & Defense,sp500
+LH,Health Care,Health Care Services,sp500
+LRCX,Information Technology,Semiconductor Materials & Equipment,sp500
+LVS,Consumer Discretionary,Casinos & Gaming,sp500
+LDOS,Industrials,Diversified Support Services,sp500
+LEN,Consumer Discretionary,Homebuilding,sp500
+LII,Industrials,Building Products,sp500
+LLY,Health Care,Pharmaceuticals,sp500
+LIN,Materials,Industrial Gases,sp500
+LYV,Communication Services,Movies & Entertainment,sp500
+LMT,Industrials,Aerospace & Defense,sp500
+L,Financials,Multi-line Insurance,sp500
+LOW,Consumer Discretionary,Home Improvement Retail,sp500
+LULU,Consumer Discretionary,"Apparel, Accessories & Luxury Goods",sp500
+LITE,Information Technology,Communications Equipment,sp500
+LYB,Materials,Specialty Chemicals,sp500
+MTB,Financials,Regional Banks,sp500
+MPC,Energy,Oil & Gas Refining & Marketing,sp500
+MAR,Consumer Discretionary,"Hotels, Resorts & Cruise Lines",sp500
+MRSH,Financials,Insurance Brokers,sp500
+MLM,Materials,Construction Materials,sp500
+MRVL,Information Technology,Semiconductors,sp500
+MAS,Industrials,Building Products,sp500
+MA,Financials,Transaction & Payment Processing Services,sp500
+MKC,Consumer Staples,Packaged Foods & Meats,sp500
+MCD,Consumer Discretionary,Restaurants,sp500
+MCK,Health Care,Health Care Distributors,sp500
+MDT,Health Care,Health Care Equipment,sp500
+MRK,Health Care,Pharmaceuticals,sp500
+META,Communication Services,Interactive Media & Services,sp500
+MET,Financials,Life & Health Insurance,sp500
+MTD,Health Care,Life Sciences Tools & Services,sp500
+MGM,Consumer Discretionary,Casinos & Gaming,sp500
+MCHP,Information Technology,Semiconductors,sp500
+MU,Information Technology,Semiconductors,sp500
+MSFT,Information Technology,Systems Software,sp500
+MAA,Real Estate,Multi-Family Residential REITs,sp500
+MRNA,Health Care,Biotechnology,sp500
+TAP,Consumer Staples,Brewers,sp500
+MDLZ,Consumer Staples,Packaged Foods & Meats,sp500
+MPWR,Information Technology,Semiconductors,sp500
+MNST,Consumer Staples,Soft Drinks & Non-alcoholic Beverages,sp500
+MCO,Financials,Financial Exchanges & Data,sp500
+MS,Financials,Investment Banking & Brokerage,sp500
+MOS,Materials,Fertilizers & Agricultural Chemicals,sp500
+MSI,Information Technology,Communications Equipment,sp500
+MSCI,Financials,Financial Exchanges & Data,sp500
+NDAQ,Financials,Financial Exchanges & Data,sp500
+NTAP,Information Technology,"Technology Hardware, Storage & Peripherals",sp500
+NFLX,Communication Services,Movies & Entertainment,sp500
+NEM,Materials,Gold,sp500
+NWSA,Communication Services,Publishing,sp500
+NWS,Communication Services,Publishing,sp500
+NEE,Utilities,Multi-Utilities,sp500
+NKE,Consumer Discretionary,"Apparel, Accessories & Luxury Goods",sp500
+NI,Utilities,Multi-Utilities,sp500
+NDSN,Industrials,Industrial Machinery & Supplies & Components,sp500
+NSC,Industrials,Rail Transportation,sp500
+NTRS,Financials,Asset Management & Custody Banks,sp500
+NOC,Industrials,Aerospace & Defense,sp500
+NCLH,Consumer Discretionary,"Hotels, Resorts & Cruise Lines",sp500
+NRG,Utilities,Independent Power Producers & Energy Traders,sp500
+NUE,Materials,Steel,sp500
+NVDA,Information Technology,Semiconductors,sp500
+NVR,Consumer Discretionary,Homebuilding,sp500
+NXPI,Information Technology,Semiconductors,sp500
+ORLY,Consumer Discretionary,Automotive Retail,sp500
+OXY,Energy,Oil & Gas Exploration & Production,sp500
+ODFL,Industrials,Cargo Ground Transportation,sp500
+OMC,Communication Services,Advertising,sp500
+ON,Information Technology,Semiconductors,sp500
+OKE,Energy,Oil & Gas Storage & Transportation,sp500
+ORCL,Information Technology,Application Software,sp500
+OTIS,Industrials,Industrial Machinery & Supplies & Components,sp500
+PCAR,Industrials,Construction Machinery & Heavy Transportation Equipment,sp500
+PKG,Materials,Paper & Plastic Packaging Products & Materials,sp500
+PLTR,Information Technology,Application Software,sp500
+PANW,Information Technology,Systems Software,sp500
+PSKY,Communication Services,Movies & Entertainment,sp500
+PH,Industrials,Industrial Machinery & Supplies & Components,sp500
+PAYX,Industrials,Human Resource & Employment Services,sp500
+PYPL,Financials,Transaction & Payment Processing Services,sp500
+PNR,Industrials,Industrial Machinery & Supplies & Components,sp500
+PEP,Consumer Staples,Soft Drinks & Non-alcoholic Beverages,sp500
+PFE,Health Care,Pharmaceuticals,sp500
+PCG,Utilities,Multi-Utilities,sp500
+PM,Consumer Staples,Tobacco,sp500
+PSX,Energy,Oil & Gas Refining & Marketing,sp500
+PNW,Utilities,Multi-Utilities,sp500
+PNC,Financials,Diversified Banks,sp500
+PPG,Materials,Specialty Chemicals,sp500
+PPL,Utilities,Electric Utilities,sp500
+PFG,Financials,Life & Health Insurance,sp500
+PG,Consumer Staples,Personal Care Products,sp500
+PGR,Financials,Property & Casualty Insurance,sp500
+PLD,Real Estate,Industrial REITs,sp500
+PRU,Financials,Life & Health Insurance,sp500
+PEG,Utilities,Electric Utilities,sp500
+PTC,Information Technology,Application Software,sp500
+PSA,Real Estate,Self-Storage REITs,sp500
+PHM,Consumer Discretionary,Homebuilding,sp500
+PWR,Industrials,Construction & Engineering,sp500
+QCOM,Information Technology,Semiconductors,sp500
+DGX,Health Care,Health Care Services,sp500
+Q,Information Technology,Semiconductor Materials & Equipment,sp500
+RL,Consumer Discretionary,"Apparel, Accessories & Luxury Goods",sp500
+RJF,Financials,Investment Banking & Brokerage,sp500
+RTX,Industrials,Aerospace & Defense,sp500
+O,Real Estate,Retail REITs,sp500
+REG,Real Estate,Retail REITs,sp500
+REGN,Health Care,Biotechnology,sp500
+RF,Financials,Regional Banks,sp500
+RSG,Industrials,Environmental & Facilities Services,sp500
+RMD,Health Care,Health Care Equipment,sp500
+RVTY,Health Care,Health Care Equipment,sp500
+HOOD,Financials,Investment Banking & Brokerage,sp500
+ROK,Industrials,Electrical Components & Equipment,sp500
+ROL,Industrials,Environmental & Facilities Services,sp500
+ROP,Information Technology,Electronic Equipment & Instruments,sp500
+ROST,Consumer Discretionary,Apparel Retail,sp500
+RCL,Consumer Discretionary,"Hotels, Resorts & Cruise Lines",sp500
+SPGI,Financials,Financial Exchanges & Data,sp500
+CRM,Information Technology,Application Software,sp500
+SNDK,Information Technology,"Technology Hardware, Storage & Peripherals",sp500
+SBAC,Real Estate,Telecom Tower REITs,sp500
+SLB,Energy,Oil & Gas Equipment & Services,sp500
+STX,Information Technology,"Technology Hardware, Storage & Peripherals",sp500
+SRE,Utilities,Multi-Utilities,sp500
+NOW,Information Technology,Systems Software,sp500
+SHW,Materials,Specialty Chemicals,sp500
+SPG,Real Estate,Retail REITs,sp500
+SWKS,Information Technology,Semiconductors,sp500
+SJM,Consumer Staples,Packaged Foods & Meats,sp500
+SW,Materials,Paper & Plastic Packaging Products & Materials,sp500
+SNA,Industrials,Industrial Machinery & Supplies & Components,sp500
+SOLV,Health Care,Health Care Technology,sp500
+SO,Utilities,Electric Utilities,sp500
+LUV,Industrials,Passenger Airlines,sp500
+SWK,Industrials,Industrial Machinery & Supplies & Components,sp500
+SBUX,Consumer Discretionary,Restaurants,sp500
+STT,Financials,Asset Management & Custody Banks,sp500
+STLD,Materials,Steel,sp500
+STE,Health Care,Health Care Equipment,sp500
+SYK,Health Care,Health Care Equipment,sp500
+SMCI,Information Technology,"Technology Hardware, Storage & Peripherals",sp500
+SYF,Financials,Consumer Finance,sp500
+SNPS,Information Technology,Application Software,sp500
+SYY,Consumer Staples,Food Distributors,sp500
+TMUS,Communication Services,Wireless Telecommunication Services,sp500
+TROW,Financials,Asset Management & Custody Banks,sp500
+TTWO,Communication Services,Interactive Home Entertainment,sp500
+TPR,Consumer Discretionary,"Apparel, Accessories & Luxury Goods",sp500
+TRGP,Energy,Oil & Gas Storage & Transportation,sp500
+TGT,Consumer Staples,Consumer Staples Merchandise Retail,sp500
+TEL,Information Technology,Electronic Manufacturing Services,sp500
+TDY,Information Technology,Electronic Equipment & Instruments,sp500
+TER,Information Technology,Semiconductor Materials & Equipment,sp500
+TSLA,Consumer Discretionary,Automobile Manufacturers,sp500
+TXN,Information Technology,Semiconductors,sp500
+TPL,Energy,Oil & Gas Exploration & Production,sp500
+TXT,Industrials,Aerospace & Defense,sp500
+TMO,Health Care,Life Sciences Tools & Services,sp500
+TJX,Consumer Discretionary,Apparel Retail,sp500
+TKO,Communication Services,Movies & Entertainment,sp500
+TTD,Communication Services,Advertising,sp500
+TSCO,Consumer Discretionary,Other Specialty Retail,sp500
+TT,Industrials,Building Products,sp500
+TDG,Industrials,Aerospace & Defense,sp500
+TRV,Financials,Property & Casualty Insurance,sp500
+TRMB,Information Technology,Application Software,sp500
+TFC,Financials,Diversified Banks,sp500
+TYL,Information Technology,Application Software,sp500
+TSN,Consumer Staples,Packaged Foods & Meats,sp500
+USB,Financials,Diversified Banks,sp500
+UBER,Industrials,Passenger Ground Transportation,sp500
+UDR,Real Estate,Multi-Family Residential REITs,sp500
+ULTA,Consumer Discretionary,Other Specialty Retail,sp500
+UNP,Industrials,Rail Transportation,sp500
+UAL,Industrials,Passenger Airlines,sp500
+UPS,Industrials,Air Freight & Logistics,sp500
+URI,Industrials,Trading Companies & Distributors,sp500
+UNH,Health Care,Managed Health Care,sp500
+UHS,Health Care,Health Care Facilities,sp500
+VLO,Energy,Oil & Gas Refining & Marketing,sp500
+VEEV,Health Care,Health Care Technology,sp500
+VTR,Real Estate,Health Care REITs,sp500
+VLTO,Industrials,Environmental & Facilities Services,sp500
+VRSN,Information Technology,Internet Services & Infrastructure,sp500
+VRSK,Industrials,Research & Consulting Services,sp500
+VZ,Communication Services,Integrated Telecommunication Services,sp500
+VRTX,Health Care,Biotechnology,sp500
+VRT,Industrials,Electrical Components & Equipment,sp500
+VTRS,Health Care,Pharmaceuticals,sp500
+VICI,Real Estate,Hotel & Resort REITs,sp500
+V,Financials,Transaction & Payment Processing Services,sp500
+VST,Utilities,Electric Utilities,sp500
+VMC,Materials,Construction Materials,sp500
+WRB,Financials,Property & Casualty Insurance,sp500
+GWW,Industrials,Industrial Machinery & Supplies & Components,sp500
+WAB,Industrials,Construction Machinery & Heavy Transportation Equipment,sp500
+WMT,Consumer Staples,Consumer Staples Merchandise Retail,sp500
+DIS,Communication Services,Movies & Entertainment,sp500
+WBD,Communication Services,Broadcasting,sp500
+WM,Industrials,Environmental & Facilities Services,sp500
+WAT,Health Care,Life Sciences Tools & Services,sp500
+WEC,Utilities,Electric Utilities,sp500
+WFC,Financials,Diversified Banks,sp500
+WELL,Real Estate,Health Care REITs,sp500
+WST,Health Care,Health Care Supplies,sp500
+WDC,Information Technology,"Technology Hardware, Storage & Peripherals",sp500
+WY,Real Estate,Timber REITs,sp500
+WSM,Consumer Discretionary,Homefurnishing Retail,sp500
+WMB,Energy,Oil & Gas Storage & Transportation,sp500
+WTW,Financials,Insurance Brokers,sp500
+WDAY,Information Technology,Application Software,sp500
+WYNN,Consumer Discretionary,Casinos & Gaming,sp500
+XEL,Utilities,Multi-Utilities,sp500
+XYL,Industrials,Industrial Machinery & Supplies & Components,sp500
+YUM,Consumer Discretionary,Restaurants,sp500
+ZBRA,Information Technology,Electronic Equipment & Instruments,sp500
+ZBH,Health Care,Health Care Equipment,sp500
+ZTS,Health Care,Pharmaceuticals,sp500
+ALNY,,,nasdaq100
+ARM,,,nasdaq100
+ASML,,,nasdaq100
+CCEP,,,nasdaq100
+FER,,,nasdaq100
+INSM,,,nasdaq100
+MELI,,,nasdaq100
+MSTR,,,nasdaq100
+PDD,,,nasdaq100
+SHOP,,,nasdaq100
+TRI,,,nasdaq100
+ZS,,,nasdaq100
+TSM,Technology,Semiconductors,extra

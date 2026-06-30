@@ -82,34 +82,30 @@ def size_allocation(buckets, regime_result, as_of, cfg: dict | None = None,
     s = buckets.satellites.copy()
     a = buckets.anchors
 
-    # Budget per sleeve. Two fixes vs the naive split:
-    #  - no regime gate -> deploy the WHOLE book into anchors (max-return mode).
-    #  - regime gate but NO satellites found (RS-only) -> fold the idle satellite budget into
-    #    anchors instead of leaving it in cash (this was a real ~40% cash-drag bug).
-    if not use_gate:
-        anchor_budget, sat_budget = 1.0, 0.0
-        notes.append("Regime gate OFF — fully deployed into anchors (max-return mode).")
-    else:
-        anchor_budget = float(budget["anchor"])
-        sat_budget = min(float(budget["satellite"]), caps["satellite_total_max"])
-        if s.empty:
-            anchor_budget += float(budget["satellite"])
-            sat_budget = 0.0
-            notes.append("No satellites this period — satellite budget deployed into anchors.")
+    # Deploy everything except the regime cash floor (0 when the gate is off). Satellites take
+    # their vol-scaled, capped share; ANCHORS ABSORB THE REST — so the book is never left with
+    # idle cash beyond the floor, regardless of how many satellites there are (the cash-drag fix,
+    # now robust to the few-satellites case, not just zero).
+    cash_floor = 0.0 if not use_gate else float(budget["cash"])
+    deployable = max(0.0, 1.0 - cash_floor)
 
-    # ANCHORS — score-weighted
-    a_w = _size_sleeve(a, anchor_budget, caps["anchor_max"],
-                       a["winner_score"].clip(lower=0) if not a.empty else pd.Series(dtype=float), kf)
-
-    # SATELLITES — vol-scaled (1/ATR%)
+    # SATELLITES first — vol-scaled (1/ATR%); only when the gate is on.
     sat_atr = {}
-    if not s.empty and sat_budget > 0:
+    s_w = pd.Series(dtype=float)
+    if use_gate and not s.empty:
+        sat_budget = min(float(budget["satellite"]), caps["satellite_total_max"], deployable)
         sat_atr = {t: _atr_pct(t, as_of) for t in s.index}
         atrp = pd.Series(sat_atr).reindex(s.index)
         inv_vol = (1.0 / atrp.replace(0, np.nan)).fillna(0.0)
         s_w = _size_sleeve(s, sat_budget, caps["satellite_max"], inv_vol, kf)
-    else:
-        s_w = pd.Series(dtype=float)
+    sat_total = float(s_w.sum()) if not s_w.empty else 0.0
+
+    # ANCHORS get the rest of the deployable book.
+    anchor_budget = max(0.0, deployable - sat_total)
+    a_w = _size_sleeve(a, anchor_budget, caps["anchor_max"],
+                       a["winner_score"].clip(lower=0) if not a.empty else pd.Series(dtype=float), kf)
+    if not use_gate:
+        notes.append("Regime gate OFF — fully deployed (max-return mode).")
 
     # designed winners: top 1-2 satellites by ERM (fallback WinnerScore)
     designed = set()

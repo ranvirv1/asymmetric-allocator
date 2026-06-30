@@ -28,12 +28,17 @@ class UniverseResult:
 
 @lru_cache(maxsize=1)
 def _seed() -> pd.DataFrame:
-    """Candidate name list. config universe.source = 'sp500' uses the mechanical S&P 500
-    constituent list (data/sp500_constituents.csv) if present; else the dev seed list."""
+    """Candidate name list. config universe.source != 'seed' uses the mechanical blended
+    members list (data/universe_members.csv = S&P 500 ∪ Nasdaq-100 ∪ TSM) if present; else
+    falls back to the dev seed list. Legacy sp500_constituents.csv is used if it's the only
+    mechanical file present."""
     source = load_config().get("universe", {}).get("source", "seed")
-    path = DATA_DIR / "sp500_constituents.csv"
-    if source != "sp500" or not path.exists():
-        path = DATA_DIR / "universe_seed.csv"
+    path = DATA_DIR / "universe_seed.csv"
+    if source != "seed":
+        for candidate in (DATA_DIR / "universe_members.csv", DATA_DIR / "sp500_constituents.csv"):
+            if candidate.exists():
+                path = candidate
+                break
     df = pd.read_csv(path, comment="#")
     df["ticker"] = df["ticker"].str.strip().str.upper()
     for col in ("sector", "industry"):

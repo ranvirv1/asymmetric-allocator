@@ -7,8 +7,8 @@ base_currency: GBP
 fx_gbp_usd: 1.27             # GBP->USD for share-count math on US-listed names (approx)
 
 universe:
-  source: sp500               # 'sp500' = mechanical S&P500 list (data/sp500_constituents.csv);
-                              # 'seed' = the 50-name dev list. sp500 kills my hand-pick bias.
+  source: blend              # 'blend' = S&P 500 ∪ Nasdaq-100 ∪ TSM (data/universe_members.csv);
+                              # 'seed' = the 50-name dev list.
   min_mktcap_usd: 1.5e+9     # signed exponent: PyYAML parses 1.5e9 as a STRING otherwise
   min_adv_usd: 10.0e+6
   index: russell1000          # approximated via current membership + delisted overlay (see §4)
@@ -47,8 +47,9 @@ cuts:
   S_cut: 75     # satellite min Winner Score
   E_hi:  65     # anchor min Extension (confirmed leader)
   E_lo:  40     # satellite max Extension (early / under-extended)
-  max_anchors: 15      # concentration sweet spot from the out-of-sample sweep (n15 best full CAGR)
-  max_satellites: 6    # small, capped satellites; the fat-tail sleeve
+  max_anchors: 5       # top-5 highest-conviction picks (R's choice; more concentrated than the
+                       # sweep's n15 sweet spot — higher conviction, higher variance/drawdown)
+  max_satellites: 0    # off — keep the book to exactly the top 5 (satellite budget folds into anchors)
 
 # Live-book behaviour
 live:
