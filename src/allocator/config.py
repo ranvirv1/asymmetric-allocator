@@ -16,9 +16,12 @@ from dotenv import load_dotenv
 
 # Project root = two levels up from this file (src/allocator/config.py -> stock/)
 ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = ROOT / "data"
+# Data/report dirs default under the project, but can be redirected to a mounted
+# persistent disk in cloud deploys (e.g. DATA_DIR=/var/data) so cache + the latest
+# report survive container restarts. See DEPLOY.md.
+DATA_DIR = Path(os.getenv("DATA_DIR") or ROOT / "data")
 CACHE_DIR = DATA_DIR / "cache"
-REPORTS_DIR = ROOT / "reports"
+REPORTS_DIR = Path(os.getenv("REPORTS_DIR") or ROOT / "reports")
 
 
 @lru_cache(maxsize=1)

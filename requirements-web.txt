@@ -1,0 +1,6 @@
+# Web layer only — what the always-on host needs to SERVE the dashboard.
+# The heavy build (pandas/yfinance/etc., see requirements.txt) runs on GitHub
+# Actions, never on the web host, so this stays tiny and can't OOM.
+flask>=3.0
+gunicorn>=21.2
+requests>=2.31
