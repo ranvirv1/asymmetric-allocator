@@ -1,27 +1,21 @@
-# Asymmetric Allocator — container image for always-on cloud hosting.
-# Build:  docker build -t allocator .
-# Run:    docker run -p 8765:8765 -e PORT=8765 \
-#           -e FRED_API_KEY=... -e FMP_API_KEY=... \
-#           -e APP_USER=you -e APP_PASSWORD=secret allocator
+# Asymmetric Allocator — web viewer image (serves the dashboard, triggers builds).
+# The heavy report build runs on GitHub Actions, so this image stays tiny and only
+# needs the web deps. Build:  docker build -t allocator .
+# Run:   docker run -p 8765:8765 -e GH_REPO=owner/repo -e GH_TOKEN=... \
+#          -e APP_USER=you -e APP_PASSWORD=secret allocator
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONUTF8=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PYTHONPATH=/app/src
+    PIP_NO_CACHE_DIR=1
 
 WORKDIR /app
 
-# Install deps first so they cache across code changes.
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
+COPY requirements-web.txt ./
+RUN pip install -r requirements-web.txt
 
-COPY . .
-# Install the `allocator` package so `import allocator` works in the refresh subprocess.
-RUN pip install -e .
+COPY webapp.py ./
 
-# One worker keeps the in-memory job state + background refresh thread coherent;
-# threads let the report serve while the status endpoint is polled. The refresh
-# itself runs as a detached subprocess, so the request timeout never kills it.
-# Shell form so $PORT (injected by the host) is expanded; defaults to 8765 locally.
+# One worker keeps the in-memory job state coherent; threads let the report serve
+# while the status endpoint is polled. Shell form so the host's $PORT is expanded.
 CMD gunicorn webapp:app --bind 0.0.0.0:${PORT:-8765} --workers 1 --threads 4 --timeout 120

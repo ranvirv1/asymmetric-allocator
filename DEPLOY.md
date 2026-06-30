@@ -1,99 +1,107 @@
 # Deploy the dashboard — view & refresh picks from your phone
 
-The dashboard (`webapp.py`) normally runs on your laptop at `127.0.0.1`. To open it
-on your **phone with the laptop off**, it has to live on an always-on host in the
-cloud. This guide gets you there in ~10 minutes, free, and ends with a one-tap app
-icon on your home screen.
+Goal: open the dashboard on your phone, tap **Refresh data**, and get this week's
+book — **with your laptop off**.
 
-What you get: a private HTTPS URL where you can read this week's book and tap
-**Refresh data** to rebuild the picks — the rebuild runs *on the server*, so your
-laptop never needs to be on.
+## How it works (and why)
 
----
+The report is cheap to *show* but expensive to *build* (it ranks the whole S&P 500
+with pandas — that needs more memory than a small free web host has). So the work is
+split:
 
-## What you need first
+```
+ your phone ──HTTPS──> Render web app  ──triggers──> GitHub Actions (16 GB runner)
+   (view + tap Refresh)   (free 512 MB,                 builds the book, no OOM,
+                           just serves + shows            publishes report to the
+                           live progress)                 `live-report` branch
+                              ▲                                     │
+                              └──────────── pulls the report ◀──────┘
+```
 
-- A free **Render** account: https://render.com (sign in with GitHub).
-- Your API keys (same ones as local — free tiers are fine):
-  - `FRED_API_KEY` — https://fred.stlouisfed.org/docs/api/api_key.html
-  - `FMP_API_KEY` — https://site.financialmodelingprep.com/developer/docs
-  - `FINNHUB_API_KEY` — optional.
-- A username + password you'll make up to lock the site (`APP_USER` / `APP_PASSWORD`).
-
-> **Why a password?** The URL is on the public internet. Without `APP_USER` +
-> `APP_PASSWORD` set, anyone who finds it can see your book and trigger refreshes.
-> The app stays open only when those two are unset (i.e. local dev).
+The web app never builds anything, so it can't run out of memory. GitHub does the
+heavy lifting on a 16 GB runner, for free.
 
 ---
 
-## Deploy on Render (recommended, free)
+## One-time setup (~15 min)
 
-1. Push this branch to GitHub (already done if you're reading this in the PR).
-2. In Render: **New +  →  Blueprint**, and select this repository.
-3. Render reads `render.yaml` and asks for the secret values. Fill in:
-   `FRED_API_KEY`, `FMP_API_KEY`, (optional `FINNHUB_API_KEY`), and your
-   `APP_USER` / `APP_PASSWORD`.
-4. Click **Apply**. First build takes a few minutes (it installs pandas etc.).
-5. Open the `https://asymmetric-allocator-XXXX.onrender.com` URL it gives you,
-   sign in with the user/password you chose, then tap **Refresh data**. The first
-   refresh pulls all market data (a few minutes); after that the book renders.
+### 1. Add your API keys to GitHub Actions (not Render)
 
-### Add it to your phone home screen (the "easy access" bit)
-- **iPhone (Safari):** open the URL → Share → **Add to Home Screen**.
-- **Android (Chrome):** open the URL → ⋮ menu → **Add to Home screen / Install app**.
+Repo → **Settings → Secrets and variables → Actions → New repository secret**. Add:
 
-You'll get an "A" app icon that opens the dashboard full-screen, no address bar.
+| Secret | Where to get it |
+| --- | --- |
+| `FRED_API_KEY` | https://fred.stlouisfed.org/docs/api/api_key.html |
+| `FMP_API_KEY` | https://site.financialmodelingprep.com/developer/docs |
+| `FINNHUB_API_KEY` | optional — https://finnhub.io/dashboard |
+
+### 2. Make sure the workflow is on `main`
+
+The `build-report` workflow (`.github/workflows/build-report.yml`) must be on your
+**default branch** for the Refresh button to trigger it. Merge this PR into `main`
+(or merge the branch) before deploying. Then test it once by hand:
+repo → **Actions → build-report → Run workflow**. It should finish green and create a
+`live-report` branch containing `latest.html`.
+
+### 3. Create a GitHub token for the web app
+
+The Render app needs to start builds and read the published report. Create a
+**fine-grained personal access token** (GitHub → Settings → Developer settings →
+Fine-grained tokens):
+
+- **Repository access:** only `asymmetric-allocator`.
+- **Permissions:** **Actions → Read and write**, **Contents → Read-only**.
+
+Copy the token (starts with `github_pat_…`).
+
+### 4. Deploy the web app on Render (free)
+
+1. [dashboard.render.com](https://dashboard.render.com) → sign in with GitHub →
+   **New + → Blueprint** → pick this repo. It reads `render.yaml`.
+2. Fill in the prompted values:
+   - `GH_TOKEN` → the token from step 3.
+   - `APP_USER` / `APP_PASSWORD` → make these up; they lock the site.
+   - (`GH_REPO` / `GH_REF` are pre-filled.)
+3. **Apply.** First build is quick now — the web image is tiny (no pandas).
+4. Open the `https://asymmetric-allocator-XXXX.onrender.com` URL, sign in, and tap
+   **Refresh data**. You'll see a live progress bar: *queued → building → done*
+   (~3-5 min, it's really running on GitHub — there's a "view build ↗" link). When
+   it finishes, the book appears.
+
+### 5. Add it to your phone home screen
+- **iPhone (Safari):** Share → **Add to Home Screen**.
+- **Pixel / Android (Chrome):** ⋮ → **Add to Home screen / Install app**.
+
+You get an "A" icon that opens the dashboard full-screen.
 
 ---
 
-## Good to know about the free tier
+## Day-to-day
 
-- **It sleeps after ~15 min idle.** The first visit after a nap takes ~1 minute to
-  wake (you'll see a spinner), then it's instant. Fine for a weekly check.
-- **Disk is ephemeral.** When the instance sleeps/redeploys, the cached data and the
-  last report are wiped, so the next visit needs a fresh **Refresh data**. To keep
-  them between visits, add a Render **Disk** (paid) and set two env vars to point at
-  it: `DATA_DIR=/var/data` and `REPORTS_DIR=/var/data/reports` (the app and engine
-  both honour these). Mount the disk at `/var/data`.
-- **Memory:** the free instance is 512 MB. The S&P-500 refresh fits, but if a build
-  ever gets OOM-killed, bump to a paid instance.
-
-### Keep it auto-fresh (optional)
-Want the book rebuilt every Monday without tapping anything? Add a Render **Cron
-Job** service in the same repo with the command:
-
-    python scripts/weekly_run.py noopen safe
-
-and a schedule of `0 11 * * 1` (Mon 11:00 UTC). It writes to the same place the web
-service reads. (Needs the persistent disk above so the web service sees the result.)
+- **It auto-builds every Monday** (the workflow's schedule), so most of the time the
+  latest book is already waiting — no tapping needed.
+- **Tap Refresh** any time to rebuild now; the **Safe/Returns** toggle rebuilds in
+  that mode. The progress bar + elapsed timer make it obvious it's working.
+- **Free Render tier sleeps after ~15 min idle** → the first visit after a nap takes
+  ~1 min to wake, then it's instant. The report itself is always current because
+  GitHub builds it independently of whether the web app is awake.
 
 ---
 
 ## Other hosts (Docker)
 
-A `Dockerfile` is included, so anything that runs a container works too —
-Fly.io, Railway, Google Cloud Run, a VPS. The container serves on `$PORT` (or 8765)
-via gunicorn. Pass the same env vars (`FRED_API_KEY`, `FMP_API_KEY`, `APP_USER`,
-`APP_PASSWORD`, optionally `DATA_DIR` / `REPORTS_DIR`). Example:
-
-    docker build -t allocator .
-    docker run -p 8765:8765 \
-      -e FRED_API_KEY=... -e FMP_API_KEY=... \
-      -e APP_USER=you -e APP_PASSWORD=secret \
-      allocator
+A tiny `Dockerfile` (web deps only) is included, so Fly.io, Railway, Cloud Run, or a
+VPS work too. Pass `GH_REPO`, `GH_TOKEN`, `APP_USER`, `APP_PASSWORD` (and optionally
+`GH_REF`). The container serves on `$PORT`.
 
 ---
 
-## Just want it on your phone at home (no cloud)
+## Run it locally (no cloud)
 
-If "laptop off" isn't a hard requirement, you can skip hosting: run it on your
-laptop bound to your LAN and open it from your phone on the same Wi-Fi.
+With no `GH_REPO`/`GH_TOKEN` set, the app falls back to building on your own machine
+in a subprocess — the original local experience:
 
-    # PowerShell, from the project root
-    $env:HOST = "0.0.0.0"
-    .\.venv\Scripts\python.exe webapp.py
+    # PowerShell, from the project root (needs the full .venv + .env keys)
+    .\.venv\Scripts\python.exe webapp.py        # http://127.0.0.1:8765
 
-Find your laptop's local IP (`ipconfig` → IPv4, e.g. `192.168.1.42`) and visit
-`http://192.168.1.42:8765` on your phone. Works only while the laptop is on and
-you're on the same network — which is why the Render path above is the real answer
-to "independent of my laptop."
+Set `HOST=0.0.0.0` to reach that local instance from your phone on the same Wi-Fi.
