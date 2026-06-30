@@ -218,6 +218,51 @@ def prefetch(tickers: list[str], chunk: int = 40, force: bool = False) -> dict[s
     return {"ok": ok, "miss": miss, "cached": skipped}
 
 
+_QUOTE_TTL = 300  # 5 min — keep live quotes fresh without hammering yfinance
+
+
+def live_quote(ticker: str, max_age: float = _QUOTE_TTL) -> float | None:
+    """Latest (real-time / ~15-min-delayed) market price via yfinance fast_info. Cached.
+    Returns None on failure (caller falls back to the last close). When the market is closed
+    this returns the last close, which is correct."""
+    ident = f"{ticker}|quote"
+    cached = cache.get_json("quote", ident, max_age_sec=max_age)
+    if cached is not None:
+        return cached.get("price")
+    price = None
+    try:
+        import logging
+
+        import yfinance as yf
+
+        logging.getLogger("yfinance").setLevel(logging.CRITICAL)
+        _throttle()
+        fi = yf.Ticker(ticker).fast_info
+        for key in ("last_price", "lastPrice"):
+            try:
+                v = fi[key]
+            except Exception:
+                v = getattr(fi, key, None)
+            if v:
+                price = float(v)
+                break
+    except Exception:
+        price = None
+    if price:
+        cache.put_json("quote", ident, {"price": price})
+    return price
+
+
+def live_quotes(tickers: list[str], max_age: float = _QUOTE_TTL) -> dict[str, float]:
+    """Live quotes for several names; missing ones are simply absent from the dict."""
+    out = {}
+    for t in tickers:
+        q = live_quote(t, max_age=max_age)
+        if q is not None:
+            out[t] = q
+    return out
+
+
 def _fetch_yfinance(ticker: str) -> pd.DataFrame:
     """Full-history research fallback (spec §4: don't productionise). Throttled, with
     yfinance's own noisy logging silenced — absent names print nothing."""

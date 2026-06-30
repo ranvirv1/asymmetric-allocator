@@ -5,4 +5,4 @@ cd /d "C:\Users\ranvi\stock"
 set PYTHONUTF8=1
 if not exist "logs" mkdir "logs"
 echo ==== run %DATE% %TIME% ==== >> "logs\weekly.log"
-".venv\Scripts\python.exe" scripts\weekly_run.py noopen snapshot >> "logs\weekly.log" 2>&1
+".venv\Scripts\python.exe" scripts\weekly_run.py noopen snapshot claudelog >> "logs\weekly.log" 2>&1

@@ -21,7 +21,8 @@ import pandas as pd
 from allocator import backtest, pipeline, report, universe, weekly
 from allocator.config import REPORTS_DIR, load_config
 
-FLAGS = {"noopen", "norefresh", "research", "ermrs", "snapshot", "returns", "safe"}
+FLAGS = {"noopen", "norefresh", "research", "ermrs", "snapshot", "returns", "safe", "early",
+         "nogpt", "claudelog", "top5", "top10", "top15"}
 
 
 def main() -> None:
@@ -29,14 +30,25 @@ def main() -> None:
     flags = {a for a in args if a in FLAGS}
     date_args = [a for a in args if a not in FLAGS]
     as_of = date_args[0] if date_args else pd.Timestamp("today").normalize().strftime("%Y-%m-%d")
-    # RS-only is the VALIDATED book (ERM hurt out-of-sample, spec §6). ERM is opt-in via `ermrs`.
-    active = ("ERM", "RS") if "ermrs" in flags else ("RS",)
+    # Signal: RS-only is VALIDATED (ERM hurt OOS, spec §6). `early` = EXPERIMENTAL emerging-momentum
+    # (short-window + acceleration + volume + breakout); `ermrs` adds the estimate-revision signal.
+    if "early" in flags:
+        active = ("EARLY",)
+    elif "ermrs" in flags:
+        active = ("ERM", "RS")
+    else:
+        active = ("RS",)
     cfg = load_config()
-    # mode dial: `returns` = full deploy (higher CAGR), `safe` = keep the regime cash sleeve.
+    # mode dial: `returns` = full deploy (higher CAGR); `safe`/`early` keep the regime cash sleeve.
     if "returns" in flags:
         cfg.setdefault("live", {})["use_regime_gate"] = False
-    elif "safe" in flags:
+    elif "safe" in flags or "early" in flags:
         cfg.setdefault("live", {})["use_regime_gate"] = True
+    # concentration dial: top5 / top10 / top15 picks.
+    for _n in (5, 10, 15):
+        if f"top{_n}" in flags:
+            cfg.setdefault("cuts", {})["max_anchors"] = _n
+            break
 
     if "norefresh" not in flags:
         tickers = universe.candidate_set(pd.Timestamp(as_of))["ticker"].tolist()
@@ -75,9 +87,31 @@ def main() -> None:
         print(f"  snapshot: {snap['saved']} names -> {snap['path']}", flush=True)
 
     bt_out = backtest.run_suite(cfg, suite=backtest.rs_suite()) if "research" in flags else None
-    report.render_dashboard(result, diff=diff, backtest=bt_out, next_run="Mon 07:00")
+
+    # Weekly auto-roll: close the live Claude round and open a fresh one from today's anchors.
+    if "claudelog" in flags:
+        try:
+            roll = weekly.roll_claude_round(result, pd.Timestamp(as_of))
+            if roll.get("rolled"):
+                print(f"  Claude round rolled: #{roll['round_id']} {roll['tickers']}", flush=True)
+            else:
+                print(f"  Claude round not rolled ({roll.get('reason')})", flush=True)
+        except Exception as e:
+            print(f"  (Claude auto-log skipped: {e})", flush=True)
+
+    gpt_results = None
+    if "nogpt" not in flags:
+        try:
+            from allocator import gpt_benchmark
+            gpt_results = gpt_benchmark.run_comparison()
+            print(f"  GPT benchmark: scored {len(gpt_results)} pick rounds", flush=True)
+        except Exception as e:  # never let the benchmark break the report
+            print(f"  (GPT benchmark skipped: {e})", flush=True)
+
+    report.render_dashboard(result, diff=diff, backtest=bt_out, next_run="Mon 07:00",
+                            gpt_comparison=gpt_results)
     latest = report.render_dashboard(result, diff=diff, backtest=bt_out, next_run="Mon 07:00",
-                                     out_path=REPORTS_DIR / "latest.html")
+                                     out_path=REPORTS_DIR / "latest.html", gpt_comparison=gpt_results)
     print(f"\nReport -> {latest}", flush=True)
     if "noopen" not in flags:
         webbrowser.open(latest.as_uri())

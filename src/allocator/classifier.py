@@ -33,8 +33,9 @@ def compute_extension(scored: pd.DataFrame, members: pd.DataFrame) -> tuple[pd.S
     """Extension 0-100 = how 'extended'/obvious a name is. High = leader, low = early."""
     notes: list[str] = []
     parts = []
-    if "RS" in scored:
-        parts.append(scored["RS"].astype(float))  # already a 0-100 percentile
+    mom_col = "RS" if "RS" in scored else ("EARLY" if "EARLY" in scored else "winner_score")
+    if mom_col in scored:
+        parts.append(scored[mom_col].astype(float))  # momentum percentile (0-100)
     size = members.set_index("ticker")["adv"].reindex(scored.index)
     if size.notna().any():
         parts.append(size.rank(pct=True) * 100.0)   # ADV as a size/liquidity proxy

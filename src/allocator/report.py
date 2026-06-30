@@ -76,14 +76,16 @@ def _changes_html(diff: dict | None) -> str:
             + "".join(chips))
 
 
-def _book_table(result: dict, bucket: str) -> str:
+def _book_table(result: dict, bucket: str, quotes: dict | None = None) -> str:
     rows = result["allocation_rows"]
     scored = result["scored"]
+    quotes = quotes or {}
     sub = rows[rows["bucket"] == bucket] if not rows.empty else rows
     if sub.empty:
         if bucket == "SATELLITE":
             return '<div class="muted">— none this week (satellites need the ERM signal; currently RS-only) —</div>'
         return '<div class="muted">— none —</div>'
+
     body = []
     for i, r in enumerate(sub.itertuples(), 1):
         ws = float(scored.loc[r.ticker, "winner_score"]) if r.ticker in scored.index else float("nan")
@@ -93,18 +95,146 @@ def _book_table(result: dict, bucket: str) -> str:
         stop_h = f'{stop} <span class="muted">({getattr(r,"stop_pct","")}%)</span>' if stop else '<span class="muted">n/a</span>'
         cat = getattr(r, "catalyst", "") or ""
         cat_h = f'<span class="amber">&#9873;</span>' if cat else ""
+        # live price + move vs entry (cell auto-updates via /api/quotes when served by the app)
+        q = quotes.get(r.ticker)
+        entry = r.price_usd or 0
+        if q and entry:
+            chg = q / entry - 1.0
+            col = "green" if chg >= 0 else "red"
+            inner = f'${q:,.2f} <span class="{col}">{chg*100:+.1f}%</span>'
+        else:
+            inner = '<span class="muted">&mdash;</span>'
+        now_h = f'<span id="q-{_esc(r.ticker)}" data-entry="{entry}">{inner}</span>'
         body.append(
             f'<tr><td class="l muted">{i}</td><td class="l tk">{_esc(r.ticker)}{star} {cat_h}</td>'
             f'<td class="l">{conv}</td>'
             f'<td>&pound;{r.gbp_amount:,.0f}</td><td class="muted">{r.target_weight*100:.1f}%</td>'
             f'<td>{r.shares}</td><td>${r.price_usd:,.2f}</td>'
+            f'<td>{now_h}</td>'
             f'<td class="red">{stop_h}</td>'
             f'<td class="muted">+50% ${getattr(r,"trim1_price","")} &middot; +100% ${getattr(r,"trim2_price","")}</td></tr>'
         )
     head = ('<table><tr><th class="l">#</th><th class="l">ticker</th><th class="l">conviction</th>'
-            '<th>deploy</th><th>wt</th><th>shares</th><th>entry</th><th>stop</th><th>take profit</th></tr>'
-            + "".join(body) + "</table>")
+            '<th>deploy</th><th>wt</th><th>shares</th><th>entry</th><th>live now</th><th>stop</th>'
+            '<th>take profit</th></tr>' + "".join(body) + "</table>")
     return head
+
+
+def _rate_cell(value, color: str) -> str:
+    """A compact 0-100 rating: thin bar + number, color-coded. None -> dash."""
+    if value is None:
+        return '<td><span class="muted">&ndash;</span></td>'
+    v = max(0, min(100, int(value)))
+    return (f'<td><span class="bar" style="width:54px"><span style="width:{v}%;'
+            f'background:var(--{color})"></span></span> <b>{v}</b></td>')
+
+
+def _reasons_html(result: dict, sig: dict) -> str:
+    """One-line, data-driven 'why up?' per pick — the actual signals that flagged it."""
+    from .data import options, prices
+    rows = result["allocation_rows"]
+    anchors = rows[rows["bucket"] == "ANCHOR"] if not rows.empty else rows
+    if anchors.empty:
+        return ""
+    reg = result["regime"].verdict.replace("_", "-")
+    spx = prices.history("^SPX")
+    spx_c = spx["close"] if not spx.empty else None
+    items = []
+    for r in anchors.itertuples():
+        df = prices.history(r.ticker)
+        if df.empty:
+            continue
+        c = df["close"]
+        px = r.price_usd
+        bits = []
+        try:
+            r6 = float(prices.trailing_return(c, 6).iloc[-1])
+            r6i = float(prices.trailing_return(spx_c, 6).iloc[-1]) if spx_c is not None else 0.0
+            if r6 - r6i > 0.02:
+                bits.append(f"<b class='green'>+{(r6-r6i)*100:.0f}pts vs S&amp;P over 6 months</b>")
+        except Exception:
+            pass
+        try:
+            s50, s200 = c.rolling(50).mean().iloc[-1], c.rolling(200).mean().iloc[-1]
+            if px and px > s50 and px > s200:
+                bits.append("above rising 50/200-day averages")
+            if float(prices.pct_from_high(c).iloc[-1]) > -0.08:
+                bits.append("near 52-week highs")
+        except Exception:
+            pass
+        upp = options.target_signals(r.ticker, px).get("upside_pct")
+        if upp and upp > 0.05:
+            bits.append(f"<b class='green'>+{upp*100:.0f}%</b> to analyst target")
+        nos = (sig.get(r.ticker, {}) or {}).get("nos")
+        if nos and nos >= 55:
+            bits.append(f"bullish options (net {nos:.0f})")
+        reason = "; ".join(bits[:3]) if bits else "top momentum rank in the universe"
+        items.append(f'<tr><td class="l tk" style="vertical-align:top">{_esc(r.ticker)}</td>'
+                     f'<td class="l muted">{reason}.</td></tr>')
+    return ('<h2>Why these picks &mdash; the upward case</h2><table>' + "".join(items) + '</table>'
+            '<div class="edge">The engine&rsquo;s data-driven case for each name: price momentum, trend, '
+            'analyst price targets, and options positioning &mdash; i.e. <i>why the signal flagged it</i>, '
+            f'not a guarantee. In a {reg} regime the strategy leans into established momentum leaders.</div>')
+
+
+def _how_to_hold_html(result: dict) -> str:
+    """Plain-English holding discipline — the strategy is signal-driven, not time-based."""
+    cfg = result.get("cfg", {})
+    ex = cfg.get("exits", {})
+    n = len(result["buckets"].anchors)
+    items = [
+        ("Rhythm", "Monthly rebalance, weekly check. The book refreshes every Monday &mdash; act on "
+                   "the <b>Changes this week</b> chips (buy the new names, sell the dropped ones)."),
+        ("Hold while", f"a name stays in this top-{n} book <b>and</b> trades above its stop. There&rsquo;s "
+                       "no fixed timer &mdash; you hold winners as long as their momentum keeps them ranked."),
+        ("Sell when", "it drops out of the book (shows up as a <b class='red'>Sell</b>) <b>or</b> closes below "
+                      "its <b class='red'>stop</b> price &mdash; whichever comes first. Stops cut losers fast."),
+        ("Take profit", f"trim &#8531; at <b>+{int(ex.get('trim1_at',0.5)*100)}%</b> and another &#8531; at "
+                        f"<b>+{int(ex.get('trim2_at',1.0)*100)}%</b>; let the rest run. Don&rsquo;t cap a winner."),
+        ("Typical hold", "weeks to a couple of months for most names; the 1&ndash;2 big winners ride far longer "
+                         "(that&rsquo;s where the returns come from)."),
+    ]
+    body = "".join(f'<div style="margin:6px 0"><b class="blue">{k}.</b> <span class="muted">{v}</span></div>'
+                   for k, v in items)
+    warn = ('<div style="margin-top:8px" class="amber">&#9873; Not buy-and-forget &mdash; the backtested edge '
+            'needs the rotation + stops. Concentrated to ' + str(n) + ' names = higher conviction but bigger swings '
+            'than the 15-name config the backtest validated.</div>')
+    return f'<h2>How to hold this book</h2><div class="panel" style="display:block">{body}{warn}</div>'
+
+
+def _signals_table(result: dict, sig: dict) -> str:
+    """Clean Prospero-style ratings — one row per holding, 0-100 each."""
+    rows = result["allocation_rows"]
+    if rows.empty or not sig:
+        return ""
+    body = []
+    for r in rows.itertuples():
+        s = sig.get(r.ticker, {})
+        nos = s.get("nos")
+        nos_v = round(nos) if nos is not None else None
+        nos_col = "green" if (nos_v is not None and nos_v >= 55) else ("red" if (nos_v is not None and nos_v <= 45) else "amber")
+        sp = s.get("short_pressure")
+        sp_col = "green" if s.get("squeeze") else "amber"   # squeeze = bullish, else neutral intensity
+        body.append(
+            f'<tr><td class="l tk">{_esc(r.ticker)}</td>'
+            + _rate_cell(nos_v, nos_col)
+            + _rate_cell(s.get("upside"), "green")
+            + _rate_cell(s.get("downside"), "red")
+            + _rate_cell(sp, sp_col)
+            + '<td class="muted" title="needs a paid / lagged feed">&ndash;</td></tr>'
+        )
+    return (
+        '<h2>Market signals</h2>'
+        '<table><tr><th class="l">ticker</th><th class="l">net options</th><th class="l">upside</th>'
+        '<th class="l">downside</th><th class="l">short pressure</th><th class="l">dark pool</th></tr>'
+        + "".join(body) + '</table>'
+        '<div class="edge">All 0&ndash;100 (80+ strong, 20&minus; weak). '
+        '<b class="green">Net options</b>: call-vs-put positioning (high = bets up). '
+        '<b class="green">Upside</b> / <b class="red">downside</b>: independent breakout scores '
+        '(options demand + analyst targets + momentum). '
+        '<b class="amber">Short pressure</b>: short-interest intensity &mdash; '
+        '<span class="green">green = squeeze</span> (heavy shorts + rising price = bullish fuel), '
+        'amber = neutral. <b>Dark pool</b>: needs a paid/lagged feed (FINRA ATS) &mdash; not free real-time.</div>')
 
 
 def _equity_svg(results: dict, w: int = 760, h: int = 220) -> str:
@@ -207,6 +337,37 @@ def _actions_html(diff: dict | None, result: dict) -> str:
     return f'<h2>This week&rsquo;s actions</h2><div class="panel" style="display:block">{items}</div>'
 
 
+def _signals_html(result: dict) -> str:
+    """Prospero-style overlay: Net Options Sentiment + analyst upside/downside per holding."""
+    from .data import options
+    rows = result["allocation_rows"]
+    if rows.empty:
+        return ""
+    body = []
+    for r in rows.itertuples():
+        nos = options.net_options_sentiment(r.ticker).get("nos")
+        tg = options.target_signals(r.ticker, r.price_usd)
+        up, dn = tg.get("upside_pct"), tg.get("downside_pct")
+        if nos is None:
+            nos_h = '<span class="muted">&mdash;</span>'
+        else:
+            col = "green" if nos >= 55 else ("red" if nos <= 45 else "amber")
+            nos_h = (f'<span class="bar" style="width:64px"><span style="width:{nos:.0f}%;'
+                     f'background:var(--{col})"></span></span> <span class="{col}">{nos:.0f}</span>')
+        up_h = (f'<span class="green">+{up*100:.0f}%</span>' if (up is not None and up >= 0)
+                else (f'<span class="red">{up*100:.0f}%</span>' if up is not None else '<span class="muted">&mdash;</span>'))
+        dn_h = f'<span class="red">{dn*100:.0f}%</span>' if dn is not None else '<span class="muted">&mdash;</span>'
+        body.append(f'<tr><td class="l tk">{_esc(r.ticker)}</td><td class="l">{nos_h}</td>'
+                    f'<td>{up_h}</td><td>{dn_h}</td></tr>')
+    return ('<h2>Market signals &mdash; options &amp; analyst targets</h2>'
+            '<table><tr><th class="l">ticker</th><th class="l">net options (0&ndash;100)</th>'
+            '<th>analyst upside</th><th>downside</th></tr>' + "".join(body) + '</table>'
+            '<div class="edge">Net options = call-vs-put open-interest/volume share (80+ = bets up, '
+            '20&minus; = bets down, ~50 = divided). Upside/downside = mean / low analyst price target '
+            'vs current price. Free delayed data &mdash; explainable analogues of Prospero&rsquo;s '
+            'signals, not their proprietary ML.</div>')
+
+
 def render_dashboard(result: dict, diff: dict | None = None, out_path: str | Path | None = None,
                      backtest: dict | None = None, next_run: str | None = None,
                      gpt_comparison: list | None = None) -> Path:
@@ -219,8 +380,13 @@ def render_dashboard(result: dict, diff: dict | None = None, out_path: str | Pat
     invested = (1 - alloc.cash_weight) * 100
     nr = f' &middot; next auto-run {next_run}' if next_run else ""
     gate_on = result.get("cfg", {}).get("live", {}).get("use_regime_gate", True)
-    mode = "Safe (regime-gated)" if gate_on else "Returns (full deploy)"
-    mode_col = "amber" if gate_on else "green"
+    is_early = "EARLY" in getattr(result.get("scored"), "columns", [])
+    if is_early:
+        mode, mode_col = "Early &mdash; catch emerging winners (experimental)", "blue"
+    elif gate_on:
+        mode, mode_col = "Safe &mdash; protect capital (regime cash buffer)", "amber"
+    else:
+        mode, mode_col = "Returns &mdash; maximise growth (fully deployed)", "green"
 
     c = reg.components
     def drv(label, key, fmt="{:+.2f}"):
@@ -229,11 +395,25 @@ def render_dashboard(result: dict, diff: dict | None = None, out_path: str | Pat
             return f'{label} <span class="muted">n/a</span>'
         return f'{label} <span class="{ "green" if v>0 else "red"}">{fmt.format(v)}</span>'
 
+    # live (delayed) market quotes for the holdings — shown as a "live now" column + move vs entry
+    from .data import prices as _prices
+    held = result["allocation_rows"]["ticker"].tolist() if not result["allocation_rows"].empty else []
+    quotes = _prices.live_quotes(held)
+    quote_note = (f' &middot; <span class="green">live prices {dt.datetime.now().strftime("%H:%M")}</span>'
+                  if quotes else ' &middot; <span class="muted">live quotes unavailable</span>')
+
+    # Prospero-style 0-100 ratings per holding (Net Options, Upside, Downside, Short Pressure).
+    from .data import options as _options
+    _scored = result["scored"]
+    sig = {}
+    for _r in result["allocation_rows"].itertuples():
+        _rs = float(_scored.loc[_r.ticker, "winner_score"]) if _r.ticker in _scored.index else None
+        sig[_r.ticker] = _options.stock_signals(_r.ticker, quotes.get(_r.ticker) or _r.price_usd, _rs)
+
     parts = [f"<style>{_CSS}</style>",
         "<h1>Asymmetric Allocator</h1>",
         f'<div class="sub">as of <b>{as_of.date()}</b> &middot; book &pound;{alloc.book_gbp:,.0f} '
-        f'&middot; mode <b class="{mode_col}">{mode}</b> &middot; generated {now}{nr} '
-        f'&middot; <span class="green">&#10003; live</span></div>',
+        f'&middot; mode <b class="{mode_col}">{mode}</b> &middot; generated {now}{nr}{quote_note}</div>',
 
         f'<div class="call" style="--cv:{vcol}">'
         f'<div class="verdict">{reg.verdict.replace("_"," ")}</div>'
@@ -247,12 +427,15 @@ def render_dashboard(result: dict, diff: dict | None = None, out_path: str | Pat
         _changes_html(diff),
         _actions_html(diff, result),
 
-        "<h2>The book &mdash; anchors</h2>", _book_table(result, "ANCHOR"),
-        "<h2>Satellites &mdash; small, high-variance bets</h2>", _book_table(result, "SATELLITE"),
+        "<h2>The book &mdash; anchors</h2>", _book_table(result, "ANCHOR", quotes),
+        "<h2>Satellites &mdash; small, high-variance bets</h2>", _book_table(result, "SATELLITE", quotes),
         f'<div class="edge" style="margin-top:12px">{len(result["buckets"].anchors)} anchors '
         f'&middot; {len(result["buckets"].satellites)} satellites &middot; {len(result["buckets"].watch)} on watch '
         f'&middot; &#9873; = catalyst (de-rate if it slips) &middot; &#9733; = designed winner</div>',
 
+        _reasons_html(result, sig),
+        _how_to_hold_html(result),
+        _signals_table(result, sig),
         _outlook_html(result, as_of),
         _glossary_html(),
     ]
@@ -281,6 +464,15 @@ def render_dashboard(result: dict, diff: dict | None = None, out_path: str | Pat
     if gpt_comparison:
         from . import gpt_benchmark
         parts.append(gpt_benchmark.render_comparison_html(gpt_comparison))
+
+    parts.append(
+        "<script>(function(){var cells=Array.prototype.slice.call(document.querySelectorAll('[id^=\"q-\"]'));"
+        "if(!cells.length)return;var syms=cells.map(function(c){return c.id.slice(2);});"
+        "function mv(ch){return '<span class=\"'+(ch>=0?'green':'red')+'\">'+(ch>=0?'+':'')+(ch*100).toFixed(1)+'%</span>';}"
+        "function poll(){fetch('/api/quotes?t='+syms.join(',')).then(function(r){return r.json();}).then(function(q){"
+        "cells.forEach(function(c){var s=c.id.slice(2),p=q[s],e=parseFloat(c.dataset.entry);"
+        "if(p){var ch=e?p/e-1:0;c.innerHTML='$'+p.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' '+mv(ch);}});"
+        "}).catch(function(){});}poll();setInterval(poll,60000);})();</script>")
 
     parts.append(
         '<div class="banner">&#9873; Decision-support, not advice &mdash; it proposes, you place manually. '

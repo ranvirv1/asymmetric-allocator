@@ -1,8 +1,8 @@
-"""Fetch the S&P 500 constituent list (Wikipedia) and bulk-fill the price cache.
+"""Fetch the blended universe (S&P 500 ∪ Nasdaq-100 ∪ TSM) and bulk-fill the price cache.
 
 Run:  $env:PYTHONUTF8=1; .venv\\Scripts\\python.exe scripts\\fetch_universe.py
-This is the survivorship-bias fix: a mechanical ~500-name universe instead of 50 hand-picked
-winners. yfinance batch-downloads in chunks; partial coverage is fine (re-run fills the rest).
+A mechanical index-membership universe (not hand-picked). yfinance batch-downloads in chunks;
+partial coverage is fine (re-run fills the rest).
 """
 from __future__ import annotations
 
@@ -12,11 +12,12 @@ from allocator.data import constituents, prices
 
 
 def main() -> None:
-    print("Fetching S&P 500 constituents from Wikipedia...", flush=True)
-    df = constituents.refresh_sp500_csv()
+    print("Fetching S&P 500 + Nasdaq-100 + TSM from Wikipedia...", flush=True)
+    df = constituents.refresh_members_csv()
     tickers = df["ticker"].tolist()
-    print(f"  got {len(tickers)} names -> {constituents.SP500_CSV}", flush=True)
-    print(f"  sectors: {df['sector'].nunique()} | sample: {tickers[:8]}", flush=True)
+    by_index = df["index"].value_counts().to_dict() if "index" in df else {}
+    print(f"  got {len(tickers)} names -> {constituents.MEMBERS_CSV}", flush=True)
+    print(f"  by source: {by_index} | sample: {tickers[:8]}", flush=True)
 
     print("\nBulk-fetching price histories via yfinance (chunked)...", flush=True)
     t0 = time.time()

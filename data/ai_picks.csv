@@ -35,3 +35,15 @@ round_id,model,round_name,source,pub_date,end_date,ticker,weight
 7,chatgpt,ChatGPT $1k Portfolio 2026,Finbold,2026-01-01,2026-06-23,LLY,0.1
 7,chatgpt,ChatGPT $1k Portfolio 2026,Finbold,2026-01-01,2026-06-23,NVDA,0.2
 7,chatgpt,ChatGPT $1k Portfolio 2026,Finbold,2026-01-01,2026-06-23,AMZN,0.15
+8,claude,Claude Allocator Top Momentum,manual,2026-06-23,2026-06-29,SNDK,0.1667
+8,claude,Claude Allocator Top Momentum,manual,2026-06-23,2026-06-29,MU,0.1667
+8,claude,Claude Allocator Top Momentum,manual,2026-06-23,2026-06-29,INTC,0.1667
+8,claude,Claude Allocator Top Momentum,manual,2026-06-23,2026-06-29,STX,0.1667
+8,claude,Claude Allocator Top Momentum,manual,2026-06-23,2026-06-29,AMD,0.1667
+8,claude,Claude Allocator Top Momentum,manual,2026-06-23,2026-06-29,LRCX,0.1667
+9,claude,Claude Allocator Jun 2026,manual,2026-06-29,,GLW,0.1667
+9,claude,Claude Allocator Jun 2026,manual,2026-06-29,,AMAT,0.1667
+9,claude,Claude Allocator Jun 2026,manual,2026-06-29,,MRNA,0.1667
+9,claude,Claude Allocator Jun 2026,manual,2026-06-29,,PANW,0.1667
+9,claude,Claude Allocator Jun 2026,manual,2026-06-29,,FTNT,0.1667
+9,claude,Claude Allocator Jun 2026,manual,2026-06-29,,LRCX,0.1667

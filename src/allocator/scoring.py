@@ -36,8 +36,9 @@ _GRADE_RANK = {
 }
 
 
-_RS_MEMO: dict[tuple, pd.Series] = {}   # (as_of, tickers) -> RS sub-score; same across strategies
-_ERM_MEMO: dict[tuple, pd.Series] = {}  # ditto for ERM — computed once per date, not per strategy
+_RS_MEMO: dict[tuple, pd.Series] = {}    # (as_of, tickers) -> RS sub-score; same across strategies
+_ERM_MEMO: dict[tuple, pd.Series] = {}   # ditto for ERM — computed once per date, not per strategy
+_EARLY_MEMO: dict[tuple, pd.Series] = {}  # ditto for the EARLY (emerging-momentum) sub-score
 
 
 def _pct_rank(s: pd.Series) -> pd.Series:
@@ -163,14 +164,60 @@ def erm_subscore(tickers: list[str], as_of: pd.Timestamp) -> pd.Series:
 
 
 # ---------------------------------------------------------------------------
+# EARLY — emerging-momentum (experimental: catch winners earlier than long-window RS)
+# ---------------------------------------------------------------------------
+
+def early_momentum_subscore(tickers: list[str], as_of: pd.Timestamp) -> pd.Series:
+    """EARLY (0-100): SHORT-window strength (1wk/1mo excess vs index) + ACCELERATION (momentum
+    speeding up) + VOLUME surge + BREAKOUT proximity. Designed to flag names *starting* to run,
+    rather than confirmed long trends. EXPERIMENTAL — not yet backtested; expect more whipsaws."""
+    memo_key = (pd.Timestamp(as_of), tuple(tickers))
+    if memo_key in _EARLY_MEMO:
+        return _EARLY_MEMO[memo_key]
+    idx_df = prices.fetch_ohlcv(INDEX, end=as_of.strftime("%Y-%m-%d"))
+    ic = idx_df["close"] if not idx_df.empty else pd.Series(dtype=float)
+    rows: dict[str, dict] = {}
+    for t in tickers:
+        df = prices.fetch_ohlcv(t, end=as_of.strftime("%Y-%m-%d"))
+        if df.empty or len(df) < 65:
+            continue
+        c, v = df["close"], df["volume"]
+        f: dict[str, float] = {}
+        for days, key in [(5, "r1w"), (21, "r1m")]:
+            if len(c) > days:
+                s = c.iloc[-1] / c.iloc[-1 - days] - 1
+                i = (ic.iloc[-1] / ic.iloc[-1 - days] - 1) if len(ic) > days else 0.0
+                f[key] = float(s - i)                                   # short excess return
+        if len(c) > 43:
+            f["accel"] = float((c.iloc[-1] / c.iloc[-22] - 1) - (c.iloc[-22] / c.iloc[-43] - 1))
+        if len(v) > 60:
+            base = v.tail(60).mean()
+            f["volsurge"] = float(v.tail(5).mean() / base - 1) if base else 0.0
+        if len(c) > 63:
+            f["breakout"] = float(c.iloc[-1] / c.tail(63).max() - 1)    # 0 = at 3-mo high
+        rows[t] = f
+    fdf = pd.DataFrame(rows).T
+    if fdf.empty:
+        result = pd.Series(dtype=float, name="EARLY")
+        _EARLY_MEMO[memo_key] = result
+        return result
+    ranks = [_pct_rank(fdf[col].astype(float)) for col in ("r1w", "r1m", "accel", "volsurge", "breakout") if col in fdf]
+    raw = pd.concat(ranks, axis=1).mean(axis=1)
+    result = _pct_rank(raw).rename("EARLY")
+    _EARLY_MEMO[memo_key] = result
+    return result
+
+
+# ---------------------------------------------------------------------------
 # WinnerScore — regime-modulated blend
 # ---------------------------------------------------------------------------
 
 def regime_weights(cfg: dict, verdict: str, active: list[str]) -> dict[str, float]:
-    """Base weights × regime modifier, restricted to `active` sub-scores, renormalised."""
+    """Base weights × regime modifier, restricted to `active` sub-scores, renormalised.
+    Signals without a configured base weight (e.g. EARLY) default to 1.0."""
     base = cfg["weights"]
     mod = cfg.get("regime_modifiers", {}).get(verdict, {})
-    w = {k: base[k] * mod.get(k, 1.0) for k in active}
+    w = {k: base.get(k, 1.0) * mod.get(k, 1.0) for k in active}
     total = sum(w.values()) or 1.0
     return {k: v / total for k, v in w.items()}
 
@@ -196,6 +243,8 @@ def score_universe(
         subs["RS"] = rs_subscore(tickers, as_of)
     if "ERM" in active:
         subs["ERM"] = erm_subscore(tickers, as_of)
+    if "EARLY" in active:
+        subs["EARLY"] = early_momentum_subscore(tickers, as_of)
 
     out = pd.DataFrame(index=pd.Index(tickers, name="ticker"))
     for k, s in subs.items():
